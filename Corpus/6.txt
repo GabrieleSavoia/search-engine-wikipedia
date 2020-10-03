@@ -1,2 +1,0 @@
-Documento di testo per vedere se funziona anche se non uso UNICODE 8.
-computer
