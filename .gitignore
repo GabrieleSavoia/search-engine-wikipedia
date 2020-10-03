@@ -1,0 +1,4 @@
+*.seg
+*.toc
+MAIN_WRITELOCK
+__pycache__/
