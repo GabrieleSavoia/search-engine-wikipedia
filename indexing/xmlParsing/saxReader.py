@@ -87,7 +87,7 @@ class SaxContentHandler(ContentHandler):
         Non è valido se contiene un redirect
         
         :param self
-        :param text: testo da coontrollare
+        :param text: testo da controllare
         """        
         if text.startswith('#REDIRECT'):
             self.valid_block = False
