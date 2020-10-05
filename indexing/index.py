@@ -19,6 +19,8 @@ from .xmlParsing import saxReader
 from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer
 from .searching.searcher import WikiSearcher
 
+from .pageRank.graph import WikiGraph 
+
 # https://github.com/iwasingh/Wikoogle/tree/master/src
 
 class WikiSchema(SchemaClass):
@@ -93,11 +95,14 @@ class WikiIndex:
             shutil.rmtree(self.name_index_dir)  
         
         os.mkdir(self.name_index_dir)
+        graph = WikiGraph()
         
         self.__index = index.create_in(self.name_index_dir, self.getSchema())
         writer = self.__index.writer(limitmb=256, procs=2, multisegment=True)       
         
-        saxReader.readXML(self.corpus_path, self.__addWikiPage, writer)
+        saxReader.readXML(self.corpus_path, self.__addWikiPage, graph, writer)
+
+        graph.end()
         
         writer.commit()
         
@@ -114,7 +119,7 @@ class WikiIndex:
             self.build()        
         
         
-    def __addWikiPage(self, writer, **data_parsed):
+    def __addWikiPage(self, graph, writer, **data_parsed):
         """
         Indicizza la pagina letta.
         E' necessario controllare che l'indice esista e che il writer sia valido.
@@ -130,7 +135,12 @@ class WikiIndex:
         :param data_parsed: dati letti e filtrati che sono stati ritornati dopo la lettura del dump xml
         """
         if self.__index is not None and writer is not None:
-            writer.add_document(text=data_parsed['text'], title=data_parsed['title'])
+            title = data_parsed['title']
+            text = data_parsed['text']
+            link = data_parsed['internal_link']
+
+            writer.add_document(text=text, title=title)
+            graph.addPage(title, link)
         else:
             print('Problemi durante indicizzazione pagina wikipedia')
             

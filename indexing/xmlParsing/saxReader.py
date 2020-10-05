@@ -108,11 +108,10 @@ class SaxContentHandler(ContentHandler):
         """
         if tag == self.block_tag and self.valid_block:
             
-            # Parsing xml
-            #res = filterText.getLinkAndCategory(self.text, self.title)
-            #internal_link = res['links']
-            #categories = res['categories']
             res ={}
+            filtered = filterText.getLinkAndCategory(self.text, self.title)
+            res['internal_link'] = filtered['links']
+            #categories = res['categories']
             
             res['text'] = filterText.getCleaned(self.text)   # DOPO AVER TROVATO I LINK !
             res['title'] = self.title
@@ -148,8 +147,6 @@ def readXML(path_file, fn, *args_fn, **kwargs_fn):
     parser.setContentHandler(handler)
        
     parser.parse(path_file)
-
-#readXML('xml/wiki_fake.xml', __addWikiPage, 4)
     
     
     
