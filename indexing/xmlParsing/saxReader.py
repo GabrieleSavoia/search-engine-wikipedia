@@ -143,7 +143,6 @@ def readXML(path_file, fn, *args_fn, **kwargs_fn):
     """
        
     parser = xml.sax.make_parser() 
-    print(parser._bufsize)
     parser.setFeature(xml.sax.handler.feature_namespaces, 0)
     
     handler = SaxContentHandler(fn, *args_fn, **kwargs_fn)
