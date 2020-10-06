@@ -7,8 +7,11 @@ Created on Sun Sep 13 14:13:56 2020
 """
 import xml
 from xml.sax import ContentHandler
+from xml.sax.xmlreader import Locator
 
 from . import filterText
+
+import sys
 
 
 class SaxContentHandler(ContentHandler):
@@ -123,7 +126,6 @@ class SaxContentHandler(ContentHandler):
             self.text = ''
             
         
-
 def readXML(path_file, fn, *args_fn, **kwargs_fn):
     """
     Per prima cosa definisco il parser, per poi instanziare il mio ContentHandler
@@ -141,6 +143,7 @@ def readXML(path_file, fn, *args_fn, **kwargs_fn):
     """
        
     parser = xml.sax.make_parser() 
+    print(parser._bufsize)
     parser.setFeature(xml.sax.handler.feature_namespaces, 0)
     
     handler = SaxContentHandler(fn, *args_fn, **kwargs_fn)

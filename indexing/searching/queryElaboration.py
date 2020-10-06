@@ -59,7 +59,7 @@ def expansion(text, n=2):
     tokens = nltk.word_tokenize(text)
     name_tokens = [token[0] for token in nltk.pos_tag(tokens)
                           if token[1][0:2] == 'NN']
-    #not_name_tokens = list(set(tokens).difference(set(name_tokens)))
+
     disambiguated_name = nounSenseDisambiguate(name_tokens)
     res = []
     for name in disambiguated_name:
@@ -82,7 +82,7 @@ def expansion(text, n=2):
             
             # aggiungo all'expansion solo i token del sinonimo che:
             #   - non sono presenti nei token della query
-            #   - non sono uguali ad altri token trovati durante l'expansione
+            #   - non sono uguali ad altri token trovati durante l'espansione
             #   - non siano vuoti
             for s in splitted_syn:  
                 to_add = s not in res and s not in [t['word'] for t in disambiguated_name]
@@ -91,3 +91,14 @@ def expansion(text, n=2):
                     res.append(s)
                     n_added += 1
     return res
+
+
+def expand_query(text):
+    list_token_expanded = expansion(text)
+    expandend = ' OR ( '+' OR '.join(list_token_expanded)+' )'
+    return ('( '+text+' )'+expandend, list_token_expanded)
+
+
+
+
+

@@ -84,6 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         title_boost = self.title_boost_spin.value()
         text_boost = self.text_boost_spin.value()
         exp = self.expansion_checkBox.isChecked()
+        page_rank = self.page_rank_checkbox.isChecked()
         
         query_results = self.wiki_index.query(text, 
                                               limit=limit, 
@@ -91,7 +92,8 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                                               group=group,
                                               title_boost=title_boost,
                                               text_boost=text_boost,
-                                              exp=exp)
+                                              exp=exp,
+                                              page_rank=page_rank)
         
         seconds = query_results['time_second']
         n_res = query_results['n_res']
@@ -104,7 +106,8 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         else:
             for pos, result in enumerate(query_results['docs']):
                 title = '<p><b>'+result['title']+'</b></p>'
-                score = '<p><i>Score</i> : '+str(round(result['score'],3))+'</p>'
+                p_r = str(result['page_rank']) if page_rank else 'Disabled'
+                score = '<p><i>Final Score</i> : '+str(round(result['final_score'],3))+' ---> <i>Score</i> : '+str(round(result['score'],3))+' | <i>Page rank</i> : '+p_r+'</p>'
                 #link =  '<p><i>Link</i> : <u>'+result['link']+'</u></p>'
                 highlight = '<p><i>highlight</i> : ... '+result['highlight'].replace('...', ' ... | ... ')+' ...</p>'
                 self.res_link.append(result['link'])

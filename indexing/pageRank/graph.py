@@ -107,14 +107,11 @@ class WikiGraph():
 
 	def end(self):
 		"""	
-		Salvataggio della table per la mappatura tra id e titoli delle pagine.
-		Non salvo il grafo intero.
-		Eseguo il pagerank.
+		Eseguo il pagerank e non salvo il grafo creato.
 
 		:param self
 		"""
-		snapSave(self.table_title, self.dir_storage+WikiTableTitle.file_name)
-		WikiPageRanker.computePageRank(self.graph, self.dir_storage)
+		WikiPageRanker.computePageRank(self.graph, self.table_title, self.dir_storage)
 
 
 class WikiPageRanker():
@@ -127,35 +124,44 @@ class WikiPageRanker():
 	def __init__(self, dir_storage='indexing/pageRank/'):
 		"""
 		Inizializzazione della classe.
-		Errore se i file non esistono.
+		Errore se il file non esiste.
 
 		:param self
 		:param dir_storage: directory per lo storage della tabella del page rank.
 		"""
-		self.table_rank = snap.TIntFltH()
+		self.table_rank = snap.TStrIntH()
 		snapLoad(self.table_rank, dir_storage+WikiPageRanker.file_name)
-
-		self.table_title = WikiTableTitle()
-		snapLoad(self.table_title, dir_storage+WikiTableTitle.file_name)
 
 
 	@classmethod
-	def computePageRank(cls, graph, dir_storage):
+	def computePageRank(cls, graph, table_title, dir_storage):
 		"""
 		Calcolo del page rank sull'intero grafo.
-		Utilizzo un Hashtable che ha come chiave l'id della pagina e come valore il page rank (float).
-		Hashtable salvata su file.
+		La funzione di page rank prende in input un hashtable vuota (int, float) e la riempie con i valori
+		calcolati.
+		L'idea era quella di convertire l'hashtable creata in una hashtable (str, float) così da avere 
+		accesso diretto al valore di page rank data la stringa del titolo.
+		Questa versione di snap però non ha implementata la classe 'TStrFltH' e per questo motivo
+		abbiamo deciso di usare 'TStrIntH' e moltiplicare per un certo valore il float del page rank.
+
+		Questa soluzione non è certamente una soluzione definitiva.
 
 		:param cls
 		:param graph: grafo su cui calcolare il page rank
+		:param table_title: fornisce la corrispondenza tra titolo e id
 		:dir_storage: dove salvare la table del page rank
 		"""
 		params = {'C': 0.85,
 				  'Eps': 1e-4,
 				  'MaxIter': 100}
 
-		table_rank = snap.TIntFltH()
-		snap.GetPageRank(graph, table_rank, *[val for val in params.values()])
+		table_rank_tmp = snap.TIntFltH()
+		snap.GetPageRank(graph, table_rank_tmp, *[val for val in params.values()])
+
+		table_rank = snap.TStrIntH()
+		for id_title in table_rank_tmp:
+			table_rank[table_title.getTitle(id_title)] = table_rank_tmp[id_title]*1000000
+
 		snapSave(table_rank, dir_storage+WikiPageRanker.file_name)
 		return table_rank
 
@@ -164,13 +170,18 @@ class WikiPageRanker():
 		"""
 		Ritorna un dict che ha come chiavi i titoli che sono stati passati nel filtro 
 		e che sono presenti nell'Hashtable del page rank e come valore il 
-		valore di page rank della pagina corrispondente.
+		valore di page rank della pagina corrispondente, moltiplicato per una costante per il motivo
+		spiegato precedentemente.
 
 		:param self
 		:param filter_title: lista di filtri di cui mi interessa il rank
 		return: python dict con i rank riferiti solo ai titoli passati nel filtro
 		"""	
-		return {title: self.table_rank[self.table_title.getId(title)] 
-				for title in filter_title if self.table_rank.IsKey(self.table_title.getId(title))}
+
+		return {title: self.table_rank[title] / 1000000 
+				for title in filter_title if self.table_rank.IsKey(title)}
+
+
+
 
 

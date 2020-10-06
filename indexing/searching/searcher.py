@@ -10,14 +10,14 @@ from whoosh.qparser import MultifieldParser
 from whoosh.searching import Searcher as WhooshSearcher
 from whoosh import scoring, qparser
 
-from .queryElaboration import expansion
+from .queryElaboration import expand_query
 
 #from analysis.analyzers import LemmatizingAnalyzer
 
 class WikiSearcher:
     
     def __init__(self, index, weighting='BM25F', group='AND', text_boost=1.0, 
-                 title_boost=1.0):
+                 title_boost=1.0, page_ranker=None):
         """
         PARSER 
             - MULTIFIELD così effettuo ricerca sia nel titolo che nel testo.
@@ -34,6 +34,8 @@ class WikiSearcher:
             - FIELDBOOST associa un valore di boost ai fields.        
         """
         self.index = index
+
+        self.page_ranker = page_ranker
         
         self.weighting=scoring.BM25F
         if weighting == 'TF_IDF':
@@ -50,14 +52,12 @@ class WikiSearcher:
                                        **group)
         
     
-    def search(self, text, limit=10, exp=True):
+    def search(self, text, limit=10, exp=True, page_rank=True):
         """
         
         """
-        if exp:
-            list_token_expanded = expansion(text)
-            expandend = ' OR ( '+' OR '.join(list_token_expanded)+' )'
-            text = '( '+text+' )'+expandend
+        if exp: 
+            text, list_token_expanded = expand_query(text)
             
         query = self.parser.parse(text)
         
@@ -69,16 +69,35 @@ class WikiSearcher:
         res = {}
         with self.index.searcher(weighting=self.weighting) as searcher:
             results = searcher.search(query, limit=limit)
-            
+
             res['time_second'] = results.runtime 
             res['expanded'] = list_token_expanded if exp else []
             res['n_res'] = results.estimated_length()
+
+            final_score_fn = combinedScore()
+            values_page_rank = {}
+            if page_rank:
+                values_page_rank = self.page_ranker.getRank([r['title'] for r in results])
+                final_score_fn = combinedScore(values_page_rank)
+                
+                results = sorted(results, key=final_score_fn, reverse=True)
+
             res['docs'] = [{'link': get_link(result['title']),
                             'title': result['title'], 
                             'text': result['text'],
                             'highlight': result.highlights("text", top=2),
-                            'score': result.score} for result in results]
+                            'final_score': final_score_fn(result),
+                            'score': result.score,
+                            'page_rank': values_page_rank.get(result['title'], 1)
+                            } for result in results]
         return res
+
+def combinedScore(page_rank=None):
+    def performScore(result):
+        if page_rank is None:
+            return result.score
+        return result.score * page_rank.get(result['title'], 1)
+    return performScore
         
         
         

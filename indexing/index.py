@@ -19,7 +19,7 @@ from .xmlParsing import saxReader
 from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer
 from .searching.searcher import WikiSearcher
 
-from .pageRank.graph import WikiGraph 
+from .pageRank.graph import WikiGraph, WikiPageRanker
 
 # https://github.com/iwasingh/Wikoogle/tree/master/src
 
@@ -57,6 +57,7 @@ class WikiIndex:
         self.corpus_path = corpus_path
         
         self.__index = None
+        self.__page_ranker = None
         
         
     def getSchema(self):
@@ -64,6 +65,19 @@ class WikiIndex:
         return dello schema dell'indice.
         """
         return WikiSchema
+
+
+    def openOrBuild(self):
+        """
+        Apre un indice già esistente oppure se non esiste ne crea uno nuovo.
+        
+        :param self
+        """
+        if self.__index is not None and self.__index.exists_in(self.name_index_dir):
+            self.__index = index.open_dir(self.name_index_dir)
+            self.__page_ranker = WikiPageRanker()
+        else:
+            self.build() 
     
 
     def build(self): 
@@ -103,20 +117,9 @@ class WikiIndex:
         saxReader.readXML(self.corpus_path, self.__addWikiPage, graph, writer)
 
         graph.end()
+        self.__page_ranker = WikiPageRanker()
         
-        writer.commit()
-        
-        
-    def openOrBuild(self):
-        """
-        Apre un indice già esistente oppure se non esiste ne crea uno nuovo.
-        
-        :param self
-        """
-        if self.__index is not None and self.__index.exists_in(self.name_index_dir):
-            self.__index = index.open_dir(self.name_index_dir)
-        else:
-            self.build()        
+        writer.commit()       
         
         
     def __addWikiPage(self, graph, writer, **data_parsed):
@@ -185,7 +188,7 @@ class WikiIndex:
         
     
     def query(self, text, limit=10, weighting='BM25F', group='AND',text_boost=1.0, 
-                 title_boost=1.0, exp=True): 
+                 title_boost=1.0, exp=True, page_rank=True): 
         """
         Viene fatto il parsing della query e poi tramite l'utilizzo di modelli
         di information retrieval, vengono estratti dall'indice i documenti
@@ -217,15 +220,11 @@ class WikiIndex:
                                     weighting=weighting, 
                                     group=group,
                                     text_boost=text_boost,
-                                    title_boost=title_boost)
-            return searcher.search(text, limit=limit, exp=exp)
+                                    title_boost=title_boost,
+                                    page_ranker=self.__page_ranker)
+            return searcher.search(text, limit=limit, exp=exp, page_rank=page_rank)
         else:
             return None
-    
-#i = WikiIndex()
-#i.build() 
-#i.query('cafè')
-#print(i.getFieldInfo('text'))
 
 
 
