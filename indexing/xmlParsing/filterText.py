@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 16 10:18:44 2020
 
-@author: gabrielesavoia
-"""
 import re
 from . import urlRequest
 
@@ -32,7 +26,7 @@ def getLinkAndCategory(text, title, link_file=False):
     
     NOTA = 'Interwiki links' per poter essere identificati, è necessario eseguire una richiesta 
            al server di WikiMedia che contiene una table con tutti i prefissi con i relativi url
-           risolti in base al prefisso. Abbaimo deciso di non considerarli per la link analysis dato
+           risolti in base al prefisso. Abbiamo deciso di non considerarli per la link analysis dato
            che si riferiscono spesso a link esterni. INTERWIKI_PREFIX contiene 
            SOLO I PREFISSI e li abbiamo salvati in un SET chiamato 'interwiki_prefix', così che la
            ricerca sia O(1), a discapito però di un maggior impiego di memoria rispetto che ad una 
@@ -141,7 +135,7 @@ def getCleaned(text):
     Mantengo invece i link interni perchè potrebbero contenere parole che possono dare un maggiore
     significato al documento.
     Esistono moltissimi tipi di tag, variabili e funzioni che potrebbero essere filtrati in modo 
-    da ottnere un testo più pulito ma abbiamo ritenuto non necessario corpire tutti i possibili casi.
+    da ottnere un testo più pulito ma abbiamo ritenuto non necessario coprire tutti i possibili casi.
     
     In questa fase NON vengono eliminati i caratteri non attinenti come '[(..' dato che è il 
     compito dell'analizzatore.
@@ -172,6 +166,16 @@ def getCleaned(text):
         (r'\[\[Media:.*?\]\]', ''),       # da 'Media:...|txt_name' -> rimane 'txt_name'
         
         (r'<[^<]*?>', ''),           # rimuovo tag html TIENI ALLA FINE 
+
+        (r'\[', ''),            # Rimuovo [
+        (r'\]', ''),            # Rimuovo ]
+        (r'\{', ''),            # Rimuovo {
+        (r'\}', ''),            # Rimuovo }
+        (r'\/', ''),            # Rimuovo /
+        (r'\:', ' '),           # Rimuovo :
+        (r'\|', ' '),           # Rimuovo |
+        (r'\=', ' '),           # Rimuovo =
+        (r'\*', ''),            # Rimuovo *
     ]
     res = text
     for old, new in replacements:

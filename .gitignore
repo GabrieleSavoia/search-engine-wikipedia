@@ -1,4 +1,3 @@
 .DS_Store
-*.seg
-*.toc
-MAIN_WRITELOCK
+indexdir/
+__pycache__/
