@@ -1,33 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 22 14:46:17 2020
-
-@author: gabrielesavoia
-"""
-
-# https://stackoverflow.com/questions/37083058/programmatically-searching-google-in-python-using-custom-search
-# https://programmablesearchengine.google.com/cse/setup/basic?cx=5fcf76f44c6462b11
-from googleapiclient.discovery import build
 
 # https://www.geeksforgeeks.org/performing-google-search-using-python-code/    
-import googlesearch
+from googlesearch import search 
 
 import math
+import time
+import json
 
 """
-my_api_key = "AIzaSyAPH6BrV0tw9ZB9evu0cx6bQlQ3Wriq-OY" #The API_KEY you acquired
-my_cse_id = "5fcf76f44c6462b11" #The search-engine-ID you created
-def google_search(search_term, api_key, cse_id, **kwargs):
-    service = build("customsearch", "v1", developerKey=api_key)
-    res = service.cse().list(q=search_term, cx=cse_id, **kwargs).execute()
-    return res['items']['link']
-results = google_search('dna', my_api_key, my_cse_id, num=10)
-for result in results:
-    print(result['link'])    
-print('\n')  
-
-
 # FORMULAZIONE ALTERNATIVA DCG
 
     @classmethod
@@ -50,13 +29,13 @@ class Evaluator:
     
     """
     
-    def __init__(self, ir_system, n_docs_per_query=10):
+    def __init__(self, ir_system):
         """
         
         """
         self.ir_system = ir_system
-        self.n_docs_per_query = n_docs_per_query
-        self.queries = set(('DNA', 'apple', 'Epigenetics', 'Hollywood', 'Maya',
+        
+        self.queries = set(('DNA', 'Apple', 'Epigenetics', 'Hollywood', 'Maya',
                            'Microsoft', 'Precision', 'Tuscany', '99 balloons',
                            'Computer Programming', 'Financial meltdown',
                            'Justin Timberlake', 'Least Squares', 'Mars robots',
@@ -65,46 +44,64 @@ class Evaluator:
                            'Eye of Horus', 'Madam I’m Adam', 'Mean Average Precision', 
                            'Physics Nobel Prizes', 'Read the manual', 'Spanish Civil War',
                            'Do geese see god', 'Much ado about nothing'))
-        self.queries = set(('dna', 'apple'))
         
-        self.test_set = self.__computeTestSet()
+        self.google_set = self.__computeTestSet()
         self.retrieval_set = self.__computeRetrievalSet()
-        
+
         
     def __computeTestSet(self):
         """
-        
+            site:en.wikipedia.org
+            docs = {}
+
+            for query in self.queries:
+                docs[query] = []
+                for doc in search(query+' site:en.wikipedia.org', tld="com", pause=2, lang='en'):
+                    if "Category:" in doc or "User:" in doc:
+                        pass
+                    else:
+                        docs[query].append(doc) 
+                    if len(docs[query]) == 10:
+                        break
+                    time.sleep(2)
+
+            print(docs)
+            
+            with open('google_links.json', 'w') as fp:
+                json.dump(docs, fp)
+
+            Abbiamo utilizzato la funzione qua sopra per ricavare i primi 10 risultati di google per ogni query.
+            I risultati ottenuti sono link a pagine che sono presenti anche nel nostro dump di wikipedia.
+            Viene infine salvato il dizionario ottenuto in un file .json per motivi di velocità.
+
+            :return docs dizionario dei documenti ricavati da google.
         """
-        docs = {}
-        
-        for query in self.queries:
-            docs[query] = []
-            for doc in googlesearch.search(query, tld="com", num=self.n_docs_per_query, 
-                                           stop=self.n_docs_per_query, 
-                                           pause=2, lang='en'): 
-                docs[query].append(doc) 
-                
+
+        with open('files/google_links.json', 'r') as fp:
+            docs = json.load(fp)
+
         return docs
     
-    
+
     def __computeRetrievalSet(self):
         """
-        
+            Viene utilizzato il nostro modello IR per ricavare i documenti in base ad una data query.
+            :return docs dizionario dei documenti ricavati dal nostro modello IR.
         """
         docs = {}
         
         for query in self.queries:
-            docs[query] = [doc['link'] for doc in self.ir_system(query)]
-            
+            docs[query] = [doc['link'] for doc in self.ir_system.query(query)['docs']]
+
         return docs
     
     
-    def MAP_(self):
+    def MAP(self):
         """
         
         """
-        return sum([len(set(self.test_set.keys()) & set(self.retrieval_set.keys())) / 
-                    len(self.retrieval_set) for _ in self.queries]) / len(self.queries)
+        return sum([len(set(self.google_set[query]) & set(self.retrieval_set[query])) / 
+                    len(self.retrieval_set[query]) for query in self.queries if len(self.retrieval_set[query]) != 0]) / len(self.queries)
     
     
     def getRelevanceVector(self, query, gt=False):
@@ -116,7 +113,7 @@ class Evaluator:
         if gt:
             return rel_gt
         
-        doc_rel_gt = {doc:rel_gt[pos] for pos, doc in enumerate(self.test_set[query])}
+        doc_rel_gt = {doc:rel_gt[pos] for pos, doc in enumerate(self.google_set[query])}
          
         return [doc_rel_gt[doc] if doc_rel_gt.get(doc, None) is not None else 0 
                             for doc in self.retrieval_set[query]]
@@ -125,7 +122,7 @@ class Evaluator:
     @classmethod
     def DCG(cls, rel_vector, rank=None, log_base=2):
         """
-        Formulazione classica del DCG
+        Formulazione classifica del DCG
         """
         if rank is None or rank > len(rel_vector):
             rank = len(rel_vector)  
@@ -152,37 +149,7 @@ class Evaluator:
                         Evaluator.DCG(self.getRelevanceVector(query, gt=True)) 
                             for query in self.queries}
  
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+       
     
     
     

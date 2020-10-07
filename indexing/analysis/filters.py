@@ -10,10 +10,13 @@ import nltk
 from whoosh.analysis import Filter
 
 class NounSelectionFilter(Filter):
-    """ Selezione dei nomi ed eliminazione del resto.
-        E' una metodologia per ridurre la grandezza dell'iverted index considerando 
-        il fatto che questi rappresentano le parti del testo con maggiore 
-        significato.
+    """ 
+    Filtro non usato nel progetto ma sviluppato per finalità di test.
+
+    Selezione dei nomi ed eliminazione del resto.
+    E' una metodologia per ridurre la grandezza dell'inverted index considerando 
+    il fatto che questi rappresentano le parti del testo con maggiore 
+    significato.
     """
     
     def __init__(self, renumber=True):
@@ -43,7 +46,7 @@ class NounSelectionFilter(Filter):
         delle stopword.
         
         IMPORTANTE : se il token non è un nome, questo non viene restituito. 
-                     Ovvero non c'è marcatura.
+                     Non c'è marcatura.
         
         :param tokens : ovvero i token provenienti dal tokenizzatore che 
                     possono essere o meno filtrati
@@ -66,7 +69,7 @@ class NounSelectionFilter(Filter):
 
 class LemmatizerFilter(Filter):
     """
-    Filtro che effettua la lemmatizzazione del testo del token
+    Filtro che effettua la lemmatizzazione del testo del token con nltk.
     """
     
     def __call__(self, tokens):

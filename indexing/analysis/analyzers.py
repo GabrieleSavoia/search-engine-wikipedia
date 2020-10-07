@@ -15,6 +15,7 @@ from .tokenizers import NltkTokenizerWithPOStag
 
 
 """
+DOCS : src whoosh -> https://github.com/mchaput/whoosh/blob/main/src/whoosh/analysis/analyzers.py
 
 ANALIZZATORE = TOKENIZZATORE + FILTRO + ... + FILTRO
         
@@ -25,33 +26,6 @@ TOKENIZZATORE : funzione o callable che prende in input una stringa unicode e
                 fa yield di token non filtrati.
 FILTRO : prende in input token e ritorna token filtrato.
 TOKEN : è una classe di Whoosh che contiene tutte le informazioni che servono per indicizzare  
-
-
-
-TOKEN
-Ogni token ha degli attributi :
-    - SETTINGS : i filtri non dovrebbero cambiarli
-        - mode (str): ovvero se l'analizzatore è chiamato durante l'indicizzazione o il query parser
-        - positions (bool): se la posizione del token è salvata 
-        - char (bool): se l'indice di start e di end è stato salvato
-        - boost (bool): se il boost è abilitato
-        - removestops (bool): se le stopword devono essere eliminate o no:
-                    è possibile il caso in cui queste vengano categorizzate come 'stopped' ma poi 
-                    non vengano eliminate.
-                    
-    - INFORMATIONS : valori che vanno settati in base ai valori del setting
-        - text (unicode): sempre presente e settato inizialmente dal tokenizzatore
-        - original (unicode): non dovrebbe mai essere modificato dai filtri
-        - pos (int): posizione del token nello stream. Si parte da 0 e ogni token aumenta di 1.
-                    SOLO SE 'positions' settings è True
-        - startchar (int): indice del carattere iniziale del token riferito alla stringa originale 
-                    SOLO SE 'char' settings è True
-        - endchar (int): indice del carattere finale del token riferito alla stringa originale 
-                    SOLO SE 'char' settings è True
-        - boost (float): solo se 'bbost' è presente in settings
-        - stopped (bool): se settata, allora questo token è uno stopword.
-                    SOLO SE 'removestops' è False, perchè se fosse True il token verrebbe direttamente 
-                    rimosso e non salvato con il campo stopped=True.
                     
 FORMAT : è riferito ad ogni field. Può essere ad esempio 'Existence', 'Positions', 'Frequency'.
         Questo chiama l'analizzatore passandogli al costruttore i campi necessari.
@@ -61,17 +35,13 @@ FORMAT : è riferito ad ogni field. Può essere ad esempio 'Existence', 'Positio
         Questo a sua volta chiama il tokenizzatore passandogli i valori settati
         ovvero scrive nei settings del token che è necessario memorizzare la posizione di ognuno.
         
-"""   
-
-
-# src whoosh -> https://github.com/mchaput/whoosh/blob/main/src/whoosh/analysis/analyzers.py
-
-# https://github.com/iwasingh/Wikoogle/blob/master/src/preprocessing/analyzer.py
-
-      
+"""  
+    
 
 def NounSelectionAnalyzer():
     """
+    Non uso questo analizzatore nel progetto ma è stato sviluppato per finalità di test.
+
     Analizzatore mediante il quale avviene la tokenizzazione con NLTK, e 
     contemporaneamente avviene anche il POS tagging per poi andare a rimuovere
     i token categorizzati come 'non-nomi'. 
@@ -108,15 +78,13 @@ def AdvancedStemmingAnalyzer(stoplist=STOP_WORDS):
     l'eliminazione delle stopword ,lo stemming e inoltre se sono presenti lettere
     con particolari accenti, queste vengono ricondotte ad una 'forma base'.
     'accent folding'
-    
     ES: 'cafè' -> 'cafe'
     
-    cachesize=-1 per definire la cache 'unbound' per lo stemming così da velocizzare l'indicizzazione.
-    
-    :param stoplist: lisat di stopword. E' possibile effettuare l'unione con altre di un altra lista
+    :param stoplist: lista di stopword. E' possibile effettuare l'unione con altre di un altra lista
     :cachesize: numero max di parole 'stemmate' da mantenere in cache. Più questo 
                 numero è alto più è veloce la fase di stemming ma maggiore è anche
-                la memoria occupata
+                la memoria occupata 
+                -1 per definire la cache 'unbound' per lo stemming così da velocizzare l'indicizzazione.
     """
     return StemmingAnalyzer(stoplist=stoplist, cachesize=-1) \
             | CharsetFilter(accent_map)

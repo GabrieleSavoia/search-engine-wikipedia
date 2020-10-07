@@ -18,10 +18,11 @@ text = "I'm booking hotel"
 # 1 tokenizzazione
 tokens = nltk.word_tokenize(text)   
 
-print(nltk.pos_tag(tokens))
+#print(nltk.pos_tag(tokens))
 
 for i in tokens:
-    print(nltk.pos_tag([i]))
+    pass
+    #print(nltk.pos_tag([i]))
 
 
 # 2 noun selection (tagging), eliminazione stopwords e case lettere.
@@ -135,7 +136,33 @@ def queryExpansionV1(index_terms, n=2):
                 res.append(synonym)
     return res
         
-print(queryExpansionV1(['computer', 'cat', 'dog']))
+#print(queryExpansionV1(['computer', 'cat', 'dog']))
+
+
+
+
+# https://www.nltk.org/_modules/nltk/wsd.html
+from nltk.wsd import lesk
+
+
+queries = set(('DNA', 'apple', 'Epigenetics', 'Hollywood', 'Maya',
+                   'Microsoft', 'Precision', 'Tuscany', '99 balloons',
+                   'Computer Programming', 'Financial meltdown',
+                   'Justin Timberlake', 'Least Squares', 'Mars robots',
+                   'Page six', 'Roman Empire', 'Solar energy', 'Statistical Significance',
+                   'Steve Jobs', 'The Maya', 'Triple Cross', 'US Constitution',
+                   'Eye of Horus', 'Madam I’m Adam', 'Mean Average Precision', 
+                   'Physics Nobel Prizes', 'Read the manual', 'Spanish Civil War',
+                   'Do geese see god', 'Much ado about nothing'))
+queries = set(('computer','mouse'))
+
+for q in queries:
+    tk = nltk.word_tokenize(q) 
+    print('Query: '+q) 
+    for t in tk:
+        synonyms_t = lesk(tk, t)
+        if synonyms_t is not None:
+            print(synonyms_t.lemma_names())
 
 
 

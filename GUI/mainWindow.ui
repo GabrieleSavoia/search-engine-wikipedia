@@ -359,6 +359,19 @@
        <string>Page Rank</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="evaluation">
+      <property name="geometry">
+       <rect>
+        <x>720</x>
+        <y>120</y>
+        <width>91</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Evaluation</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

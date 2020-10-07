@@ -122,6 +122,9 @@ class Ui_MainWindow(object):
         self.page_rank_checkbox = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
         self.page_rank_checkbox.setGeometry(QtCore.QRect(260, 170, 91, 20))
         self.page_rank_checkbox.setObjectName("page_rank_checkbox")
+        self.evaluation = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.evaluation.setGeometry(QtCore.QRect(720, 120, 91, 41))
+        self.evaluation.setObjectName("evaluation")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -147,4 +150,5 @@ class Ui_MainWindow(object):
         self.query_setting_restore_button.setText(_translate("MainWindow", "Restore All"))
         self.expansion_checkBox.setText(_translate("MainWindow", "Expansion terms"))
         self.page_rank_checkbox.setText(_translate("MainWindow", "Page Rank"))
+        self.evaluation.setText(_translate("MainWindow", "Evaluation"))
 

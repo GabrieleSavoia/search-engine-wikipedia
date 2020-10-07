@@ -32,14 +32,7 @@ class WikiSchema(SchemaClass):
     Tutti i Field ereditano da FieldType.
     Ogni Field ha un certo Format, che indica come salvare la posting list (se salvare le pos, la freq..)
     
-    FUNZIONAMENTO: passo ad esempio il testo di wikipedia ricavato dall'xml al
-                    Field chiamato 'text', questo lo passa al suo corrispettivo 
-                    oggetto Format (salvato come attributo nella classe Field), che
-                    a sua volta chiama l'analizzatore settato in fase di definiszione 
-                    dello schema, per poi salvarlo sul disco in base al tipo di 
-                    Format.
-    
-    TEXT : usa il Format 'Position' se 'phrase=true' (default) --> (WORD-BASED) con anche il numero delle 
+    TEXT -> usa il Format 'Position' se 'phrase=true' (default) --> (WORD-BASED) con anche il numero delle 
             volte in cui si ripete il token nel documento
     """
     text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
@@ -47,21 +40,29 @@ class WikiSchema(SchemaClass):
     
 
 class WikiIndex:
+
+    name_index = 'indexdir'
+    name_corpus = 'wiki_fake.xml'
     
-    def __init__(self, name_index_dir, corpus_path):
+    def __init__(self, dir_storage):
         """
-        :param name_index_dir : nome della cartella dove memorizzare l'indice
-        :param corpus_path : path per il corpus
+        Inizializzazione classe.
+
+        :param dir_storage : nome della cartella dove è presente la cartella dell'indice 'indexdir'
         """
-        self.name_index_dir = name_index_dir
-        self.corpus_path = corpus_path
+        self.dir_storage = dir_storage
+        self.index_path = self.dir_storage+WikiIndex.name_index
+
+        self.corpus_path = self.dir_storage+WikiIndex.name_corpus
         
         self.__index = None
         self.__page_ranker = None
+        self.__searcher = None
         
-        
-    def getSchema(self):
+    @classmethod 
+    def getSchema(cls):
         """
+        :param self
         return dello schema dell'indice.
         """
         return WikiSchema
@@ -73,11 +74,20 @@ class WikiIndex:
         
         :param self
         """
-        if self.__index is not None and self.__index.exists_in(self.name_index_dir):
-            self.__index = index.open_dir(self.name_index_dir)
-            self.__page_ranker = WikiPageRanker()
+        if index.exists_in(self.index_path):
+            print('  Lettura indice da file..')
+            try:
+                self.__index = index.open_dir(self.index_path)
+                self.__afterBuild()
+
+                return True
+            except Exception as e:
+                print(e)
+                print('! Errore caricamento indice dal path: '+self.index_path)
+                return False
         else:
-            self.build() 
+            print('  Creazione indice dal dump..')
+            return self.build() 
     
 
     def build(self): 
@@ -93,7 +103,7 @@ class WikiIndex:
         
         TUNING   DOCS : https://whoosh.readthedocs.io/en/latest/batch.html
         # limitmb : default=128 sono i mega usati per l'index pool. Più è alto più è veloce
-                    Se uso multiprocessor è la memoria per ogni processore !!
+                    Se uso multiprocessor è la memoria per ogni processore.
         # procs : n proc che vengono usati. Vengono creati sub-writer per ogni processsore.
                   Per fare il marge dei segmenti creati da ogni processore però
                   viene comunque usato un singlo processo.
@@ -105,22 +115,40 @@ class WikiIndex:
         :param self
         """
         
-        if os.path.exists(self.name_index_dir):
-            shutil.rmtree(self.name_index_dir)  
-        
-        os.mkdir(self.name_index_dir)
-        graph = WikiGraph()
-        
-        self.__index = index.create_in(self.name_index_dir, self.getSchema())
-        writer = self.__index.writer(limitmb=256, procs=2, multisegment=True)       
-        
-        saxReader.readXML(self.corpus_path, self.__addWikiPage, graph, writer)
+        if os.path.exists(self.index_path):
+            shutil.rmtree(self.index_path)  
+        os.mkdir(self.index_path)
 
-        graph.end()
-        self.__page_ranker = WikiPageRanker()
+        graph = WikiGraph(self.dir_storage)
         
-        writer.commit()       
-        
+        self.__index = index.create_in(self.index_path, WikiIndex.getSchema())
+
+        writer = self.__index.writer(limitmb=256, procs=2, multisegment=True)  
+
+        try:     
+            saxReader.readXML(self.corpus_path, self.__addWikiPage, graph, writer)
+            writer.commit()
+            graph.end()
+            self.__afterBuild()  
+
+            return True           
+        except Exception as e: 
+            print(e)
+            print('! Errore durante la creazione indice.')
+            return False   
+
+
+    def __afterBuild(self):
+        """
+        Funzione che deve essere chiamata dopo che l'indice è stato creato oppure caricato da file.
+        Configura il page_ranker e il searcher.
+
+        :param self
+        """
+        self.__page_ranker = WikiPageRanker(self.dir_storage)
+        self.__searcher = WikiSearcher(self.__index, self.__page_ranker)
+        print('* Creazione / caricamento indice avvenuta con successo')
+
         
     def __addWikiPage(self, graph, writer, **data_parsed):
         """
@@ -129,11 +157,7 @@ class WikiIndex:
         Questa funzione viene chiamata dal SAX (lettore xml) ogni volta che una pagina è stata letta
         in modo completo dal dump xml.
         
-        NOTA: 'writer' lo passo come parametro alla funzione. Avrei potuto ricavarlo direttamente
-              all'interno di questa funzione per poi eseguire il commit sempre all'interno. Questo però
-              risulta essere più costoso dato che sarebbero operazioni da svolgere per ogni pagina letta.
-              Quindi abbiamo deciso di delegare il controllo del writer al di fuori di questa funzione.
-        
+        :param graph: instanza di grafo per il page rank
         :param writer: writer per poter aggiungere all'index la pagina di wikipedia letta dal dump
         :param data_parsed: dati letti e filtrati che sono stati ritornati dopo la lettura del dump xml
         """
@@ -145,7 +169,7 @@ class WikiIndex:
             writer.add_document(text=text, title=title)
             graph.addPage(title, link)
         else:
-            print('Problemi durante indicizzazione pagina wikipedia')
+            print('! Problemi durante indicizzazione pagina wikipedia di titolo: '+title)
             
             
     def getFieldInfo(self, field):
@@ -156,8 +180,7 @@ class WikiIndex:
         :param field: field di cui voglio le informazioni
         return dict con le info del field specificato
         """
-        if self.__index is None:
-            return None
+        if self.__index is None: return None
         
         res = {}
         with self.__index.searcher() as searcher:
@@ -176,8 +199,7 @@ class WikiIndex:
         :param self:
         return dict con le info
         """
-        if self.__index is None:
-            return None        
+        if self.__index is None: return None        
         
         res = {}
         with self.__index.searcher() as searcher:
@@ -186,60 +208,19 @@ class WikiIndex:
         return res
         
         
-    
-    def query(self, text, limit=10, weighting='BM25F', group='AND',text_boost=1.0, 
-                 title_boost=1.0, exp=True, page_rank=True): 
+    def query(self, text, **settings): 
         """
         Viene fatto il parsing della query e poi tramite l'utilizzo di modelli
         di information retrieval, vengono estratti dall'indice i documenti
         più rilevanti per la query.
         
-        - Parser   --> riferito ad un certo field. Serve per definire la 
-                        STRUTTURA SINTATTICA della query. 
-                        E' necessario quindi eseguire un'analizzatore per effettuare
-                        la tokenizzazione con eventuali filtri.
-                        L'ANALIZZATORE usato è quello associato al field dello schema.
-                        Il parser si occupa di defnire le regole sintattiche come
-                        gli 'and' oppure gli 'or' tra i token.
-                        Di default i token vengono messi in 'and', ma si può settare OrGroup.
-                       
-        - Searcher --> esegue la ricerca della query parsata. Qua viene definito:
-                        - limit    --> è il numero di risultati in risposta
-                        - IR model --> default è BM25F
-                        - numero HITS di dafault a 20 
-                        - len(result) -> numero di docs che fanno MATCH (UNSCORED)
-                        - 
-        
-        :param query: query dell'utente non ancora parsata 
+        :param text: testo da parsare per ottenere la query vera e propria
+        :param settings: sono i settaggi del searcher 
         :return dict con il tempo di esecuzione della query, i documneti totali
                         e il riferimento ai documenti interi (url)
         """
-        
         if self.__index is not None:
-            searcher = WikiSearcher(self.__index, 
-                                    weighting=weighting, 
-                                    group=group,
-                                    text_boost=text_boost,
-                                    title_boost=title_boost,
-                                    page_ranker=self.__page_ranker)
-            return searcher.search(text, limit=limit, exp=exp, page_rank=page_rank)
+            return self.__searcher.search(text, **settings)
         else:
             return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

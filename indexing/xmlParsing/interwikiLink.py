@@ -6,8 +6,10 @@ Created on Wed Sep 16 08:13:44 2020
 @author: gabrielesavoia
 """
 import requests
+import os, os.path
+import pickle
 
-def getInterwikiMap():
+def getPrefixSet(dir_storage):
     """
     DOCS   https://www.mediawiki.org/wiki/Manual:Interwiki
     
@@ -17,9 +19,19 @@ def getInterwikiMap():
     
     Questi chiaramente occupano memoria però abbiamo deciso di utilizzare i SET in modo tale che 
     il costo di ricerca sia O(1).
+
+    Il set viene salvato su file. Se questo file non esiste, allora eseguo la richiesta url da wikipedia.
+    Se il file esiste non avviene la richiesta url e leggo il file.
     
     return set di prefissi
     """
+
+    file_name = 'interwiki.prefix'
+    path = dir_storage+file_name
+
+    if os.path.exists(path):
+        with open(path, 'rb') as fp: 
+            return set(pickle.load(fp))
     
     url = 'https://www.mediawiki.org/w/api.php'
     
@@ -35,5 +47,8 @@ def getInterwikiMap():
     pref = set()
     for i in resp['query']['interwikimap']:
         pref.add(i['prefix'])
+
+    with open(path, 'wb') as fp: 
+        pickle.dump(pref, fp)
     
     return pref

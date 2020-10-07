@@ -40,6 +40,16 @@ class WikiTableTitle(snap.TTableContext):
 	DOCS : https://snap.stanford.edu/snappy/doc/reference/table.html#ttablecontext
 
 	Mappatura dei titoli dei testi di Wikipedia con un numero univoco.
+	Abbiamo deciso di non usare gli id forniti nel xml di wikipedia perchè la costruzione del 
+	grafico che effettuiamo è incrementale per ogni pagina letta. Questo significa che quando 
+	una pagina completa è stata letta, questa viene aggiunta all'indice e viene anche aggiunta al grafo.
+	Perchè sia aggiunta in modo corretto al grafo è necessario che vengano specificati i link a cui
+	questa pagina punta. Il problema sta nel fatto che questi link sono in formato testuale (titoli) e magari
+	sono di pagine non ancora lette dal SAX e quindi con id ancora ignoto. 
+
+	Tramite questa classe associamo un id unicovo incrementale (partendo da 0) ad ogni titolo che 
+	aggiungiamo al grafo.
+
 	"""
 	file_name = 'id_title.tablecontext'
 
@@ -77,7 +87,7 @@ class WikiGraph():
 			   'TNEANet': snap.TNEANet,		# network              -> SI attributi su archi e nodi
 				}			   								
 
-	def __init__(self, t_graph='TNGraph', dir_storage='indexing/pageRank/'):
+	def __init__(self, dir_storage, t_graph='TNGraph'):
 		"""
 		Inizializzazione della classe.
 
@@ -107,7 +117,9 @@ class WikiGraph():
 
 	def end(self):
 		"""	
-		Eseguo il pagerank e non salvo il grafo creato.
+		Eseguo il pagerank salvando solamente il file con titolo-val_pagerank.
+		Non abbiamo ritenuto opportuno salvare il grafo dato che per questo progetto 
+		l'unico suo uso è quello di eseguire il pagerank.
 
 		:param self
 		"""
@@ -121,10 +133,10 @@ class WikiPageRanker():
 	"""
 	file_name = 'table.rank'
 
-	def __init__(self, dir_storage='indexing/pageRank/'):
+	def __init__(self, dir_storage):
 		"""
 		Inizializzazione della classe.
-		Errore se il file non esiste.
+		Genera eccezione se il file non esiste.
 
 		:param self
 		:param dir_storage: directory per lo storage della tabella del page rank.
@@ -163,21 +175,19 @@ class WikiPageRanker():
 			table_rank[table_title.getTitle(id_title)] = table_rank_tmp[id_title]*1000000
 
 		snapSave(table_rank, dir_storage+WikiPageRanker.file_name)
-		return table_rank
 
 
 	def getRank(self, filter_title):
 		"""
 		Ritorna un dict che ha come chiavi i titoli che sono stati passati nel filtro 
 		e che sono presenti nell'Hashtable del page rank e come valore il 
-		valore di page rank della pagina corrispondente, moltiplicato per una costante per il motivo
+		valore di page rank della pagina corrispondente, diviso per una costante per il motivo
 		spiegato precedentemente.
 
 		:param self
 		:param filter_title: lista di filtri di cui mi interessa il rank
 		return: python dict con i rank riferiti solo ai titoli passati nel filtro
 		"""	
-
 		return {title: self.table_rank[title] / 1000000 
 				for title in filter_title if self.table_rank.IsKey(title)}
 

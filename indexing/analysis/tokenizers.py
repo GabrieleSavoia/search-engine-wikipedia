@@ -11,6 +11,8 @@ from whoosh.analysis import Tokenizer, Token
          
 class NltkTokenizerWithPOStag(Tokenizer):
     """
+    Tokenizzatore non usato nel progetto ma sviluppato solo per finalità di test.
+
     La tokenizzazione è fatta tramite nltk e contemporaneamente avviene
     anche il POS tag per ogni token.
     Questo viene aggiunto come attributo della classe Token.
@@ -20,6 +22,10 @@ class NltkTokenizerWithPOStag(Tokenizer):
     elaborare.
     Infatti se provo a passargli singolarmente le varie parole il tagging 
     può risultare scorretto.
+
+    Aggiungo quindi a 'Token' un attributo 'tag' che corrisponde al postag calcolato con nltk.
+    Questa soluzione 
+
     ESEMPIO:
         1)  QUA VA BENE :
             tokens = nltk.word_tokenize("born")  
@@ -35,7 +41,7 @@ class NltkTokenizerWithPOStag(Tokenizer):
             print(nltk.pos_tag(tokens))          # 'born' -> 'VB' -> OK
             
             for i in tokens:
-                print(nltk.pos_tag([i]))         # 'born' -> 'NN' -> NO perchè in questo 
+                print(nltk.pos_tag([i]))         # 'born' -> 'NN' -> NO perchè in questo caso
                                                                     è verbo
             
     """
@@ -53,6 +59,8 @@ class NltkTokenizerWithPOStag(Tokenizer):
                  start_pos = 0, start_char = 0, mode = '', **kwargs):
         """
         Eseguo tokenizzazione con nltk e post tag.
+
+        Aggiungo al 'Token' l'attributo 'tag' che corrisponde al postag calcolato con nltk.
         
         :param value: La stringa unicode da tokenizzare
         :param positions: Se salvarsi le posizioni
@@ -64,7 +72,9 @@ class NltkTokenizerWithPOStag(Tokenizer):
             invece di 0,1,2,...
         :param start_char: offset per l'indice inizale dei caratteri. 
             se start_char=2, il testo "aaa bbb"
-            avrà (2,5),(6,9) invece di (0,3),(4,7).
+            avrà (2,5),(6,9) invece di (0,3),(4,7)
+        :param mode
+        :param kwargs
         """
         
         assert isinstance(value, str), "%r is not unicode" % value

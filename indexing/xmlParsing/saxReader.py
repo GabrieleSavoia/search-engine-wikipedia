@@ -34,6 +34,8 @@ class SaxContentHandler(ContentHandler):
         self.text = ''
         
         self.valid_block = True
+
+        self.filter = filterText.FilterWikiText()
                             
 
     def startElement(self, tag, attributes):
@@ -64,14 +66,14 @@ class SaxContentHandler(ContentHandler):
             if self.current_tag == 'title':
                 self.title += content.strip()
                 
-            elif self.current_tag == 'ns' and self._validNs(content):
-                pass
+            elif self.current_tag == 'ns':
+                self._checkValidNs(content)
                 
             elif self.current_tag == 'text' and self._validText(content):
                 self.text += content
                 
                 
-    def _validNs(self, ns):
+    def _checkValidNs(self, ns):
         """
         Controlla che il namespace sia valido.
         Non è valido se ha uno dei valori qua scritti.
@@ -111,13 +113,13 @@ class SaxContentHandler(ContentHandler):
         """
         if tag == self.block_tag and self.valid_block:
             
+            # Filtraggio
             res ={}
-            filtered = filterText.getLinkAndCategory(self.text, self.title)
+            filtered = self.filter.performFiltering(self.text, self.title)
             res['internal_link'] = filtered['links']
-            #categories = res['categories']
-            
-            res['text'] = filterText.getCleaned(self.text)   # DOPO AVER TROVATO I LINK !
+            res['text'] = filtered['text_filtered']
             res['title'] = self.title
+
             # Usa il risultatao
             self.fn(*self.args_fn, **self.kwargs_fn, **res)
             
@@ -128,18 +130,13 @@ class SaxContentHandler(ContentHandler):
         
 def readXML(path_file, fn, *args_fn, **kwargs_fn):
     """
-    Per prima cosa definisco il parser, per poi instanziare il mio ContentHandler
-    e poi eseguire il vero e proprio parsing.
-    - xml.sax.make_parser() -> ritorna un xml.reader object (reader è sinonimo di parser).
-                                Si tratta quindi di una funzione che legge un insieme di byte
-                                o di caratteri da una fonte (es file xml) e genera degli eventi 
-                                in base a quello che ha letto. Questi eventi sono poi gestiti da un
-                                ContentHandler.
+    Definisco il parser, instanzio il mio ContentHandler e poi eseguo il vero e proprio parsing.
     
-    
-    :param path_file : il path relativo per il file xml.
-    :param custom_fun : la funzione da eseguire quando il parser ha riconosciuto 
-                        una certo blocco che mi interessa
+    :param path_file: il path relativo per il file xml.
+    :param fn: la funzione da eseguire quando il parser ha riconosciuto 
+                una certo blocco che mi interessa
+    :param args_fn: argomenti da passare alla funzione
+    :param kwargs_fn: argomenti da passare alla funzione
     """
        
     parser = xml.sax.make_parser() 
