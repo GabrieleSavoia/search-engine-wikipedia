@@ -29,11 +29,12 @@ class Evaluator:
     
     """
     
-    def __init__(self, ir_system):
+    def __init__(self, ir_system, settings):
         """
         
         """
         self.ir_system = ir_system
+        self.settings = settings
         
         self.queries = set(('DNA', 'Apple', 'Epigenetics', 'Hollywood', 'Maya',
                            'Microsoft', 'Precision', 'Tuscany', '99 balloons',
@@ -91,7 +92,7 @@ class Evaluator:
         docs = {}
         
         for query in self.queries:
-            docs[query] = [doc['link'] for doc in self.ir_system.query(query)['docs']]
+            docs[query] = [doc['link'] for doc in self.ir_system.query(query, **self.settings)['docs']]
 
         return docs
     
