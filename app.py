@@ -20,13 +20,14 @@ from indexing.searching.searcher import WikiSearcher
 
 import sys  
 
+
 class CustomDialog(QDialog):
 
-    def __init__(self, wiki_index):
+    def __init__(self, wiki_index, settings):
         super(CustomDialog, self).__init__()
 
         self.wiki_index = wiki_index
-        self.evaluator = evaluation.Evaluator(self.wiki_index)
+        self.evaluator = evaluation.Evaluator(self.wiki_index, settings)
 
         self.textMAP = QLabel('<b>'+'MAP: '+'</b>'+self.evaluator.MAP().__str__())
 
@@ -93,7 +94,7 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
 
     def computeEvaluation(self):
-        dlg = CustomDialog(self.wiki_index)
+        dlg = CustomDialog(self.wiki_index, self.getSettings())
         dlg.exec_()   
         
         
@@ -108,6 +109,17 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         
         self.expansion_checkBox.setChecked(True)
         self.page_rank_checkbox.setChecked(False)
+
+
+    def getSettings(self):
+    	return  {'limit': self.limit_spin.value(), 
+                    'exp' : self.expansion_checkBox.isChecked(), 
+                    'page_rank' : self.page_rank_checkbox.isChecked(),
+                    'text_boost' : self.text_boost_spin.value(),
+                    'title_boost' : self.title_boost_spin.value(),
+                    'weighting' : self.weighting_combo.currentText(),
+                    'group' : self.groupCombo.currentText(),
+                    }
         
         
     def startSearchEvent(self):
@@ -116,15 +128,9 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         self.res_link = []
         
         text = self.search_query.text()
+
+        settings = self.getSettings()
         
-        settings = {'limit': self.limit_spin.value(), 
-                    'exp' : self.expansion_checkBox.isChecked(), 
-                    'page_rank' : self.page_rank_checkbox.isChecked(),
-                    'text_boost' : self.text_boost_spin.value(),
-                    'title_boost' : self.title_boost_spin.value(),
-                    'weighting' : self.weighting_combo.currentText(),
-                    'group' : self.groupCombo.currentText(),
-                    }
         query_results = self.wiki_index.query(text, **settings)
 
         self.updateResultWidgetList(settings, query_results)
