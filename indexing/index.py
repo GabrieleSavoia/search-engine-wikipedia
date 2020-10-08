@@ -36,7 +36,7 @@ class WikiSchema(SchemaClass):
             volte in cui si ripete il token nel documento
     """
     text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
-    title = TEXT(analyzer=LemmatizingAnalyzer(), stored=True)
+    title = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
     
 
 class WikiIndex:

@@ -10,7 +10,7 @@ from whoosh.qparser import MultifieldParser
 from whoosh.searching import Searcher as WhooshSearcher
 from whoosh import scoring, qparser
 
-from .queryElaboration import expand_query
+from .queryExpansion import Expander
 
 class WikiSearcher:
 
@@ -43,6 +43,8 @@ class WikiSearcher:
         self.index = index
 
         self.page_ranker = page_ranker
+
+        self.expand = Expander(disambiguate_fn='noun_sense')
 
         self.parser = qparser.QueryParser(None, index.schema)
         self.multifield_plugin = qparser.MultifieldPlugin(['text', 'title'])
@@ -78,7 +80,7 @@ class WikiSearcher:
         self.parser.group = WikiSearcher.group.get(group, 'AND')
         weighting = WikiSearcher.weighting.get(weighting, 'BM25F')
 
-        text, list_token_expanded = expand_query(text) if exp else (text, None)
+        text, list_token_expanded = self.expand(text) if exp else (text, None)
         query = self.parser.parse(text)
         
         print('\n')

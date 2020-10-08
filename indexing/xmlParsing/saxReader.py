@@ -13,6 +13,14 @@ from . import filterText
 
 import sys
 
+NS_NOT_VALID = {'-1': 'Special', '1': 'Talk', '2': 'User' , '3': 'User_talk' , '5': 'Wikipedia_talk', 
+                '6': 'File', '7': 'File_talk' , '9': 'MediaWiki_talk', '11': 'Template_talk', '12': 'Help', 
+                '13': 'Help_talk', '14': 'Category', '15': 'Category_talk', '101': 'Portal_talk', 
+                '109': 'Book_talk', '119': 'Draft_talk', '447': 'Education_Program_talk', 
+                '711': 'TimedText_talk', '829': 'Module_talk', '2301': 'Gadget_talk',
+                '2303': 'Gadget_definition_talk',
+                }
+
 
 class SaxContentHandler(ContentHandler):
     """
@@ -81,7 +89,7 @@ class SaxContentHandler(ContentHandler):
         :param self
         :param ns: numero del namespace        
         """
-        if ns==6 or ns==7:
+        if ns in NS_NOT_VALID.keys():
             self.valid_block = False
         return self.valid_block                 
                 
@@ -106,26 +114,28 @@ class SaxContentHandler(ContentHandler):
         pagina, ovvero ho letto tutte le informazioni di una pagina e le voglio
         indicizzare.
         In questo caso svolgo anche il filtraggio del testo dell'xml ricavando gli elementi che 
-        mi servono come i link e le categorie a cui appartiene la pagina.
+        mi servono.
         
         :param self
         :param tag : ovvero il nome dell'elemento es: ' <movie> </movie> ' -> tag è 'movie'
         """
-        if tag == self.block_tag and self.valid_block:
-            
-            # Filtraggio
-            res ={}
-            filtered = self.filter.performFiltering(self.text, self.title)
-            res['internal_link'] = filtered['links']
-            res['text'] = filtered['text_filtered']
-            res['title'] = self.title
+        if tag == self.block_tag: 
+            if self.valid_block:
+                # Filtraggio
+                res ={}
+                filtered = self.filter.performFiltering(self.text, self.title)
+                res['internal_link'] = filtered['links']
+                res['text'] = filtered['text_filtered']
+                res['title'] = self.title
 
-            # Usa il risultatao
-            self.fn(*self.args_fn, **self.kwargs_fn, **res)
-            
+                # Usa il risultato
+                self.fn(*self.args_fn, **self.kwargs_fn, **res)
+
             # Reset
             self.title = ''
             self.text = ''
+            self.valid_block=True
+
             
         
 def readXML(path_file, fn, *args_fn, **kwargs_fn):
