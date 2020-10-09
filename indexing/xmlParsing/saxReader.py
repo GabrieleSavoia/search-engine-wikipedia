@@ -9,9 +9,13 @@ import xml
 from xml.sax import ContentHandler
 from xml.sax.xmlreader import Locator
 
+from xml.sax.expatreader import ExpatParser
+
 from . import filterText
 
 import sys
+
+import os
 
 NS_NOT_VALID = {'-1': 'Special', '1': 'Talk', '2': 'User' , '3': 'User_talk' , '5': 'Wikipedia_talk', 
                 '6': 'File', '7': 'File_talk' , '9': 'MediaWiki_talk', '11': 'Template_talk', '12': 'Help', 
@@ -27,7 +31,7 @@ class SaxContentHandler(ContentHandler):
     Sottoclasse di xml.sax.ContentHandler
     """
     
-    def __init__(self, fn, *args_fn, **kwargs_fn):
+    def __init__(self, parser, fn, *args_fn, **kwargs_fn):
         """
         Inizializzazione variabili di instanza.
         """
@@ -44,6 +48,8 @@ class SaxContentHandler(ContentHandler):
         self.valid_block = True
 
         self.filter = filterText.FilterWikiText()
+
+        self.parser = parser
                             
 
     def startElement(self, tag, attributes):
@@ -123,9 +129,9 @@ class SaxContentHandler(ContentHandler):
             if self.valid_block:
                 # Filtraggio
                 res ={}
-                filtered = self.filter.performFiltering(self.text, self.title)
+                filtered = self.filter.getLinkAndCategory(self.text, self.title)
                 res['internal_link'] = filtered['links']
-                res['text'] = filtered['text_filtered']
+                res['text'] = self.text
                 res['title'] = self.title
 
                 # Usa il risultato
@@ -137,7 +143,6 @@ class SaxContentHandler(ContentHandler):
             self.valid_block=True
 
             
-        
 def readXML(path_file, fn, *args_fn, **kwargs_fn):
     """
     Definisco il parser, instanzio il mio ContentHandler e poi eseguo il vero e proprio parsing.
@@ -150,13 +155,22 @@ def readXML(path_file, fn, *args_fn, **kwargs_fn):
     """
        
     parser = xml.sax.make_parser() 
+    parser._bufsize=2**16-20
+
     parser.setFeature(xml.sax.handler.feature_namespaces, 0)
     
-    handler = SaxContentHandler(fn, *args_fn, **kwargs_fn)
+    handler = SaxContentHandler(parser, fn, *args_fn, **kwargs_fn)
     parser.setContentHandler(handler)
        
+    import time
+
+    start = time.time()
+
     parser.parse(path_file)
     
+    end = time.time()
+
+    print('time : '+str(round(end-start, 5)))
     
     
     

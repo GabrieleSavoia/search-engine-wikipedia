@@ -13,18 +13,23 @@ from nltk.wsd import lesk
 class Disambiguator():
 
     @classmethod
-    def leskDisambiguate(cls, *args, **kwargs):
+    def leskDisambiguate(cls, tokens, index_term):
         """
         DOC: https://www.nltk.org/_modules/nltk/wsd.html
-        
+             https://www.linkedin.com/pulse/wordnet-word-sense-disambiguation-wsd-nltk-aswathi-nambiar/
+
+        Esegue la disambiguazione del termine 'index_term'.
+
+        :param tokens: token della frase
+        :param index_term: termine da disambiguare
+        return: significato del token disambiguato 
         """
-        return lesk(*args, **kwargs)
+        return lesk(tokens, index_term, 'n')
 
     @classmethod
-    def nounSenseDisambiguate(cls, tokens, index_term, *args):
+    def nounSenseDisambiguate(cls, tokens, index_term):
         """
-        Avviene la disambiguazione (ovvero ritorno il significato più pertinente) in riferimento
-        al token 'index_term' nell'insieme 'tokens'.
+        Avviene la disambiguazione in riferimento al token 'index_term' nell'insieme 'tokens'.
         
         Per ogni index_term Tx, devo assegnarli il proprio significato corretto in base 
         al contesto in cui si trova.
@@ -65,7 +70,7 @@ class Disambiguator():
 
 class Expander():
     """
-    Callable che mi ritorna l'espanzione della query.
+    Callable che gestisce l'espansione della query.
     """
 
     disambiguate_fn_map = {'lesk': Disambiguator.leskDisambiguate,
@@ -73,15 +78,17 @@ class Expander():
                            }
 
 
-    def __init__(self, disambiguate_fn='lesk'):
+    def __init__(self, disambiguate_fn, n_per_token=4):
         """
         Inizializzazione classe in cui specifico la funzione che voglio usare per la
-        disambiguazione.
+        disambiguazione e il numero max di token estesi per ogni token.
 
         :param self
         :param disambiguate_fn: funzione usata per la disambiguazione
+        :param n_per_token: numero di termini espansi per token
         """
         self.disambiguate_fn = Expander.disambiguate_fn_map[disambiguate_fn]
+        self.n_per_token = n_per_token
         self.stopword = nltk.corpus.stopwords.words('english')
 
 
@@ -99,6 +106,10 @@ class Expander():
     def getRelatedTerms(self, best_sense):
         """
         Dato il significato di un token mi ritorna i termini pertinenti.
+        In questo caso abbiamo scelto di ritornare i sinonimi.
+
+        Abbiamo deciso di trasformare questa operazione in una funzione dato che 
+        in futuro potrebbe essere espansa al fine di ottenere risultati più precisi.
 
         :param self
         :param best_sense: significato del token
@@ -114,7 +125,7 @@ class Expander():
         Query expansion basata sui sinonimi dei nomi della query. 
         
         Ricavo i nomi dalla query, per poi effettuare una disambiguazione tra essi 
-        e salvarmi i primi n sinonimi trovati per ogni nome.
+        e salvarmi al più self.n_per_token sinonimi trovati per ogni nome.
 
         Per ogni sinonimo tolgo gli eventuali trattini (questo può portare al fatto che un singolo sinonimo
         abbia più token).
@@ -126,7 +137,9 @@ class Expander():
 
         res=[]
         for token in tokens:
-            best_sense = self.disambiguate_fn(tokens, token, 'n')
+            n=0
+
+            best_sense = self.disambiguate_fn(tokens, token)
 
             related_terms = self.getRelatedTerms(best_sense)
 
@@ -140,19 +153,24 @@ class Expander():
 
                 for term in splitted_term:  
                     if term not in res and len(term)>2 and term.strip()!='':
-                        res.append(term)
+                        if n<self.n_per_token:
+                            res.append(term)
+                            n+=1
         return res
 
     def __call__(self, text):
         """
         Ritorna il testo espanso.
+        I token dell'espansione vengono considerati con un boost della metà rispetto ai token 
+        digitati dall'utente.
 
         :param self
         :param text: testo da cui fare espansione
         return: testo espanso in cui ho imposto regole sintattiche
         """
         list_token_expanded = self.expansion(text)
-        expandend = ' OR ( '+' OR '.join(list_token_expanded)+' )'
+        token_exp_sequence = ' OR '.join(list_token_expanded)
+        expandend = ' OR ( '+token_exp_sequence+' )^0.5'
         return ('( '+text+' )'+expandend, list_token_expanded)
 
 

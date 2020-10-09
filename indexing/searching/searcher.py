@@ -100,8 +100,8 @@ class WikiSearcher:
 
             res['docs'] = [{'link': 'https://en.wikipedia.org/wiki/'+result['title'].replace(" ", "_"),
                             'title': result['title'], 
-                            'text': result['text'],
-                            'highlight': result.highlights("text", top=2),
+                            #'text': result['text'],
+                            #'highlight': result.highlights("text", top=2),
                             'final_score': final_score_fn(result),
                             'score': result.score,
                             'page_rank': values_page_rank.get(result['title'], -1)

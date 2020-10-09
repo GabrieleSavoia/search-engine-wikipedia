@@ -134,9 +134,10 @@ class FilterWikiText():
                         res_dict['links'].append(res)
         return res_dict 
 
+"""
     @classmethod
     def getCleaned(cls, text):
-        """
+        
         # DOCS   https://www.mediawiki.org/wiki/Help:Magic_words
         
         Questa funzione esegue operazioni che potrebbero essere effettuate anche in un secondo 
@@ -158,7 +159,7 @@ class FilterWikiText():
         :param text: testo da pulire
         
         return testo pulito
-        """
+        
         
         replacements = [
             
@@ -197,25 +198,8 @@ class FilterWikiText():
             res = re.sub(old, new, res, flags=re.DOTALL) # perchè il '.' non fa match con newline 
 
         return res  
-
-
-    def performFiltering(self, text, title):  
-        """
-        Con questa funzione eseguo sia il filtraggio dei link, che la pulizia generale del 
-        testo.
-
-        :param cls
-        :param text: testo da filtrare
-        :param title: titlo del testo corrente
-
-        return: dict con i valori filtrati
-        """ 
-        res = self.getLinkAndCategory(text, title)
-        res['text_filtered'] = FilterWikiText.getCleaned(text) 
-
-        return res  
                     
-                    
+ """                   
                     
                     
                     

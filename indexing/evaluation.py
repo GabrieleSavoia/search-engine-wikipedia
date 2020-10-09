@@ -6,6 +6,10 @@ import math
 import time
 import json
 
+import os, os.path
+
+from .xmlParsing.saxReader import NS_NOT_VALID
+
 """
 # FORMULAZIONE ALTERNATIVA DCG
 
@@ -53,23 +57,6 @@ class Evaluator:
     def __computeTestSet(self):
         """
             site:en.wikipedia.org
-            docs = {}
-
-            for query in self.queries:
-                docs[query] = []
-                for doc in search(query+' site:en.wikipedia.org', tld="com", pause=2, lang='en'):
-                    if "Category:" in doc or "User:" in doc:
-                        pass
-                    else:
-                        docs[query].append(doc) 
-                    if len(docs[query]) == 10:
-                        break
-                    time.sleep(2)
-
-            print(docs)
-            
-            with open('google_links.json', 'w') as fp:
-                json.dump(docs, fp)
 
             Abbiamo utilizzato la funzione qua sopra per ricavare i primi 10 risultati di google per ogni query.
             I risultati ottenuti sono link a pagine che sono presenti anche nel nostro dump di wikipedia.
@@ -77,9 +64,28 @@ class Evaluator:
 
             :return docs dizionario dei documenti ricavati da google.
         """
+        docs = {}
 
-        with open('files/google_links.json', 'r') as fp:
-            docs = json.load(fp)
+        if os.path.exists('files/google_links.json'):
+            with open('files/google_links.json', 'r') as fp:
+                docs = json.load(fp)
+        else:
+            for query in self.queries:
+                docs[query] = []
+                for doc in search(query+' site:en.wikipedia.org', tld="com", pause=2, lang='en'):
+                    valid = True
+                    for not_valid in NS_NOT_VALID.values():
+                        if not_valid in doc:
+                            valid = False
+                            continue
+                    if valid == True:        
+                        docs[query].append(doc) 
+                    if len(docs[query]) == 10:
+                        break
+                    time.sleep(2)
+            
+            with open('files/google_links.json', 'w') as fp:
+                json.dump(docs, fp)
 
         return docs
     

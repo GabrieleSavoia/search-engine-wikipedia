@@ -11,7 +11,7 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QProgressBar
 
 from GUI import mainWindow, delegates  # comando :  pyuic5 mainWindow.ui -o mainWindow.py
 
@@ -19,6 +19,8 @@ from indexing import index, evaluation
 from indexing.searching.searcher import WikiSearcher
 
 import sys  
+
+import time
 
 
 class CustomDialog(QDialog):
@@ -150,10 +152,10 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 title = '<p><b>'+result['title']+'</b></p>'
                 p_r = str(result['page_rank']) if settings.get('page_rank') else 'Disabled'
                 score = '<p><i>Final Score</i> : '+str(round(result['final_score'],3))+' ---> <i>Score</i> : '+str(round(result['score'],3))+' | <i>Page rank</i> : '+p_r+'</p>'
-                #link =  '<p><i>Link</i> : <u>'+result['link']+'</u></p>'
-                highlight = '<p><i>highlight</i> : ... '+result['highlight'].replace('...', ' ... | ... ')+' ...</p>'
+                link =  '<p><i>Link</i> : <u>'+result['link']+'</u></p>'
+                #highlight = '<p><i>highlight</i> : ... '+result['highlight'].replace('...', ' ... | ... ')+' ...</p>'
                 self.res_link.append(result['link'])
-                self.resultWidgetList.insertItem(pos, title+score+highlight)
+                self.resultWidgetList.insertItem(pos, title+score+link)
                 
                 if (pos % 2) == 0: 
                     self.resultWidgetList.item(pos).setBackground(QColor('#f5f5f5'))
@@ -198,6 +200,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
 
     wiki_index = index.WikiIndex('files/')
+
     if wiki_index.openOrBuild():
         main = MainWindow(wiki_index)
         main.show()

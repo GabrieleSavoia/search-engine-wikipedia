@@ -35,8 +35,8 @@ class WikiSchema(SchemaClass):
     TEXT -> usa il Format 'Position' se 'phrase=true' (default) --> (WORD-BASED) con anche il numero delle 
             volte in cui si ripete il token nel documento
     """
-    text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
-    title = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
+    text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=False, phrase=False) #phrase=False per ridurre index
+    title = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True, phrase=True)
     
 
 class WikiIndex:
