@@ -1,10 +1,10 @@
 
 import re
-from . import interwikiLink
+from . import interwikiLink, saxReader
 
 class FilterWikiText():
 
-    def __init__(self, dir_storage='files/'):
+    def __init__(self, path_interwiki_links):
         """
         Inizializzazione interwiki_prefix_set che corrisponde ad un set contenente tutti i prefix 
         degli interwiki link.
@@ -12,49 +12,45 @@ class FilterWikiText():
         :param self
         :param dir_storage: directory dove salvare i prefix degli interwiki link
         """
-        self.interwiki_prefix_set = interwikiLink.getPrefixSet(dir_storage)
+        self.interwiki_prefix_set = interwikiLink.getPrefixSet(path_interwiki_links)
 
 
-    def getLinkAndCategory(self, text, title, link_file=False):
+    def getLinkAndCategory(self, text, title):
         """
         # DOCS   https://www.mediawiki.org/wiki/Help:Links#Internal_links
         # DOCS   https://www.mediawiki.org/wiki/Help:Categories
-        # DOCS   https://www.mediawiki.org/wiki/Help:Images   alla fine per le diff tra ':File' 'File' ..
+        # DOCS   https://www.mediawiki.org/wiki/Help:Images   
         # DOCS   https://meta.wikimedia.org/wiki/Help:Interwiki_linking   INTERWIKI
         
         Rilevamento dei link e delle categorie del testo presenti nella stringa del campo 'text'.
         Abbiamo deciso di usare una singola funzione perchè per definire le categorie che appartengono
-        ad un certo testo si usa la stessa struttura dei link, ovveo [[Category:]], ma senza i ':' iniziali.
+        ad un certo testo si usa la stessa struttura dei link.
         L'obbiettivo è quello di ricavare i link interni ad altre pagine wikipedia. 
-        Esistono diversi modi per definire un link interno e con questa funzione abbiamo cercato di 
-        ricoprire i casi più importanti.
+        Questa funzione ha principalmente 2 scopi:
+            - RISOLUZIONE LINK: nel testo i link possono non essere scritti per intero ma usare regole di abbreviazione. Quindi mi devo 
+                                occupare di risolvere queste abbreviazioni
+            - FILTRAGGIO: seleziono solo i link che mi interessano.
+                            Ad esempio non considero gli INTERWIKI LINK e link a NAMESPACE che ho considerato non validi.
         
-        Il salvataggio dei link e categorie è sottoforma di stringhe con spazi, 
-        questi andranno trasformati in '_' se voglio avere il link vero e proprio.
-        
-        NOTA = 'Interwiki links' per poter essere identificati, è necessario eseguire una richiesta 
-               al server di WikiMedia che contiene una table con tutti i prefissi con i relativi url
-               risolti in base al prefisso. Abbiamo deciso di non considerarli per la link analysis dato
-               che si riferiscono spesso a link esterni. INTERWIKI_PREFIX contiene 
-               SOLO I PREFISSI e li abbiamo salvati in un SET chiamato 'interwiki_prefix', così che la
-               ricerca sia O(1), a discapito però di un maggior impiego di memoria rispetto che ad una 
-               lista.
-        
+        Questa funzione mi permette di ridurre considerevolmente i link associati a questa pagina e 
+        quindi viene ottimizzato il pagerank.
+
+        Le categorie non sono state usate ai fini del progetto.
+
         :param self
         :param text: il testo da cui estrarre i link
         :param title: il titolo del teso, che corrisponde al link della pagina 
-        :param link_file: bool per decidere se è opportuno considerare i link a file multimediali
         
         return res_dict: dizionario con 2 liste, una per le categorie e una per i link
-        
         """
         res_dict ={'links': [], 'categories': []}
         
-        # prima usavo questa (.+?)  ma è meglio  ([^\]]+)
+        # reg exp per determinare i link da text wiki '[[link]]'
         pattern = re.compile(r'\[\[([^\]]+?)\]\]') 
         
         for match in re.finditer(pattern, text):
-            res = match.group(1).split("|")[0].strip()   # strip rimuove spazi inizio o fine
+            # [[Link name| display name]]   -->  res = 'Link name'   -> non considero il display name perchè non fa parte del link
+            res = match.group(1).split("|")[0].strip() 
             
             # link a una sezione nella stessa pagina non lo considero (startswith('#'))
             # se il link è uguale a titolo delle pagina, allora NON è un link ma viene solo messo in grassetto il testo in fase di visualizzazione
@@ -81,70 +77,53 @@ class FilterWikiText():
                 # la aggiungo alla lista delle categorie
                 elif res.startswith('Category'):
                     is_category = True
-                    
-                # Si tratta di LINK a PAGINE DI CATEGORIE. Questo NON significa che il documento 
-                # corrente fa parte della categoria linkata. 
-                elif res.startswith(':Category'):
-                    res = res[1:]                    # tolgo primo carattere ':'                    
-                    
-                # Link TESTUALE (NON E' IMMAGINE) che punta AD UNA PAGINA WIKIPEDIA contenente l'IMMAGINE
-                # le sue caratteristiche e in più UN ELENCO DI TUTTE LE PAGINE CHE LA USANO.
-                # Questo elenco è sotto forma di lista di link a pagine.
-                elif res.startswith(':File'):
-                    if link_file: 
-                        res = res[1:]
-                    else:
-                        res = None
-                    
-                # E' un'IMMAGINE che contiene un link. Questo link può essere customizzato ma abbiamo
-                # deciso che non è opportuno salvarselo per lo scopo di questo progetto. 
-                elif (res.startswith('Media:') or 
-                      res.startswith('File:') or 
-                      res.startswith('Image:')):
-                    if not link_file:
-                        res = None
-                
-                # Pagine personali degli utenti oppure a specifiche revisioni 
-                # specificando il numero di revisione.
-                # Non serve salvarsi i link.
-                elif res.startswith('Special:'):
-                    res = None
-                
-                # Abbiamo deciso di non risolvere il valore di queste variabili in link dato che 
+
+                # NON risolviamo link che contengono variabili {{''}} dato che 
                 # servono principalmente per riferirsi a Talk pages oppure risolvere link di
-                # help pages per ricondursi a link di base.
+                # help pages per ricondursi a link di base
                 elif res.startswith('{{'):
                     res = None
+
+                # Prefissi che non sono NAMESPACE non li considero
+                elif res.startswith('Image:') or res.startswith('Manual:') or res.startswith('Extension:'):
+                    res = None
+
+                # match_ è NOT NONE se il link ha queste forme :   ':x:y'  o  'x:y'  o  ':x:y:z'  o  'x:y:z'  ...
+                # ovvero se è un candidato INTERWIKI LINK o LINK a pagine in cui è specificato il NAMESAPCE.
+                # Se è NOT NONE allora ricavo il prefix :   ':x:y:z' --> 'x'  o  'x:y' --> 'x'    (toglie ':')
+                  # Una volta ricavata la 'x' (prefix), controllo se 
+                    #  1) è un INTERWIKI LINK  --> res = None
+                    #  2) è link a pagina che ha NAMESPACE non valido  -->  res = None
+                    #  Se non soddisfa 1) e 2) allora significa che è un link che ha ':' nel titolo ma non corrisponde a interwiki o namespace non validi --> link valido
+                # Se invece match_ è NONE, significa che il link non è INTERWIKILINK e non fa parte di NAMESPACE non validi --> link PROBABILMENTE valido
+                else:
+                    match_ = re.search(r'^:?[^:]+?:', res)
+                    if match_ is not None:
+                        pref = re.sub(r':', '', match_[0]) 
+                        if pref in self.interwiki_prefix_set:
+                            res = None
+                        else:
+                            for ns_not_valid in saxReader.NS_NOT_VALID.values():  
+                                if pref == ns_not_valid.replace("_", " "):
+                                    res = None
                     
-                # Controlla se è un 'interwiki' link.
-                # Se lo è lo ignoro.
-                # IMPORTANTE : questa regola è molto generica e tienila in basso così se 'res' soddisfa 
-                # regole più specifiche (scritte sopra) qua non entra.
-                elif re.search(r'^:?[^:]+?:', res) is not None:
-                    pref = re.search(r'^:?[^:]+?:', res)[0]
-                    pref = re.sub(r':', '', pref) 
-                    if pref in self.interwiki_prefix_set:
-                        res = None                    
-                    
-                # Se res == None --> tipo di link non gestito e non faccio niente
+                # Se res == None --> tipo di link non considerato e non faccio niente
+                # Se non è una categoria, è possibile che un titolo inizi con ':', ma il titolo effettivo è senza ':', quindi li tolgo.
+                # es :   [[:Article]] è equivalente con [[Article]], ma mi salvo solo 'Article'
                 if res is not None:
                     if is_category:
                         res_dict['categories'].append(res)
                     else:
+                        res = re.sub(r':', '', res)  
                         res_dict['links'].append(res)
         return res_dict 
 
-"""
+
     @classmethod
     def getCleaned(cls, text):
-        
+        """
         # DOCS   https://www.mediawiki.org/wiki/Help:Magic_words
         
-        Questa funzione esegue operazioni che potrebbero essere effettuate anche in un secondo 
-        momento dall'analizzatore di whoosh. E' comunque importante effettuare questa pulizia del
-        tetso prima che venga indicizzato perchè mi permette di ottenere highlight dei risultati 
-        molto più puliti.
-
         Eseguo una pulizia del testo dalle parti che sicuramente non sono importanti ai fini del
         progetto come i tag html, i link esterni..
         Mantengo invece i link interni perchè potrebbero contenere parole che possono dare un maggiore
@@ -159,7 +138,7 @@ class FilterWikiText():
         :param text: testo da pulire
         
         return testo pulito
-        
+        """
         
         replacements = [
             
@@ -170,7 +149,7 @@ class FilterWikiText():
             (r'{{[^}{]*?coord.*?}}', ''),     # rimuovo {{..coord..}}
         
             (r'\[http.+?\]', ''),          # rimuovo link esterni [http..]
-            (r'\shttp.+?\s', ''),          # rimuovo link esterni  -> NON FUNZIONA SE url è inizio stringa !! 
+            (r'\shttp.+?\s', ''),          # rimuovo link esterni
             (r'\s[^\s]+\.com\s?', ''),     # rimuovo ogni parola che termina con '.com' |
             (r'\s[^\s]+\.org\s?', ''),     # rimuovo ogni parola che termina con '.org' |
             (r'\s[^\s]+\.it\s?', ''),      # rimuovo ogni parola che termina con '.it'  | --> Li elimino perchè sono link esterni a wikipedia e non li considero importanti per l'applicazione
@@ -198,8 +177,20 @@ class FilterWikiText():
             res = re.sub(old, new, res, flags=re.DOTALL) # perchè il '.' non fa match con newline 
 
         return res  
-                    
- """                   
+
+
+    def startFilter(self, text, title):
+        """
+        Effettuo filtraggio completo della pagina di wikipedia.
+
+        :param self
+        :param text: testo della pagina
+        :parma title: titolo della pagina
+        """
+        res = self.getLinkAndCategory(text, title)
+        res['text'] = FilterWikiText.getCleaned(text)
+        return res
+
                     
                     
                     

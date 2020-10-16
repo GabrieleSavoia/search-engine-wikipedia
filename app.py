@@ -19,7 +19,7 @@ from indexing import index, evaluation
 from indexing.searching.searcher import WikiSearcher
 
 import sys  
-
+import argparse
 import time
 
 
@@ -153,9 +153,9 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 p_r = str(result['page_rank']) if settings.get('page_rank') else 'Disabled'
                 score = '<p><i>Final Score</i> : '+str(round(result['final_score'],3))+' ---> <i>Score</i> : '+str(round(result['score'],3))+' | <i>Page rank</i> : '+p_r+'</p>'
                 link =  '<p><i>Link</i> : <u>'+result['link']+'</u></p>'
-                #highlight = '<p><i>highlight</i> : ... '+result['highlight'].replace('...', ' ... | ... ')+' ...</p>'
+                highlight = '<p><i>highlight</i> : ... '+result['highlight'].replace('...', ' ... | ... ')+' ...</p>'
                 self.res_link.append(result['link'])
-                self.resultWidgetList.insertItem(pos, title+score+link)
+                self.resultWidgetList.insertItem(pos, title+score+highlight)
                 
                 if (pos % 2) == 0: 
                     self.resultWidgetList.item(pos).setBackground(QColor('#f5f5f5'))
@@ -196,16 +196,47 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
                 print('Errore durante apertura del link '+ link)
             
         
-def main():
+def main(args_paths):
     app = QtWidgets.QApplication(sys.argv)
 
-    wiki_index = index.WikiIndex('files/')
+    wiki_index = index.WikiIndex(args_paths)
 
     if wiki_index.openOrBuild():
         main = MainWindow(wiki_index)
         main.show()
         sys.exit(app.exec_())
 
-if __name__ == '__main__':      
-    main()
+
+if __name__ == '__main__':
+
+    p = argparse.ArgumentParser(description='Creazione Wiki Search Engine con interfaccia grafica.')
+    p.add_argument(
+        '--index_dir',
+        type=str,
+        default='files/indexdir',
+        help='Folder indice whoosh.')
+    p.add_argument(
+        '--corpus',
+        type=str,
+        default='files/filtered.xml',
+        help='File xml filtrato.')
+    p.add_argument(
+        '--google_links',
+        type=str,
+        default='files/google_links.json',
+        help='File json che contiene il dict con le query di google e i rispettivi links.')
+    p.add_argument(
+        '--interwiki_links',
+        type=str,
+        default='files/interwiki.prefix',
+        help='File per gli interwiki links.')
+    p.add_argument(
+        '--pagerank',
+        type=str,
+        default='files/table.rank',
+        help='File dove salvo il pagerank calcolato')
+
+    args_paths = p.parse_args()   
+
+    main(args_paths)
 

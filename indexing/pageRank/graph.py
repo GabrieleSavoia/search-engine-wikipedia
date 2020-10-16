@@ -10,188 +10,181 @@ import snap
 
 
 def snapSave(to_save, file_name):
-	"""
-	Salvataggio in formato binario.
-	Viene sovrascritto il contenuto del file specificato.
-	Viene creato il file se non esiste.
+    """
+    Salvataggio in formato binario.
+    Viene sovrascritto il contenuto del file specificato se già esistente.
+    Viene creato il file se non esiste.
 
-	:param enitity: oggetto da salvare
-	:param file_name: nome del file dove salvare l'entità
-	"""
-	f_out = snap.TFOut(file_name)
-	to_save.Save(f_out)
-	f_out.Flush()
+    :param to_save: oggetto da salvare
+    :param file_name: nome del file dove salvare l'oggetto
+    """
+    f_out = snap.TFOut(file_name)
+    to_save.Save(f_out)
+    f_out.Flush()
 
 
 def snapLoad(to_load, file_name):
-	"""
-	Caricamento da file.
+    """
+    Caricamento da file.
 
-	:param enitity: oggetto da caricare
-	:param file_name: nome del file da dove caricare l'entità
-	"""
-	f_in = snap.TFIn(file_name)
-	to_load.Load(f_in) 
-
-
-
-class WikiTableTitle(snap.TTableContext):
-	"""
-	DOCS : https://snap.stanford.edu/snappy/doc/reference/table.html#ttablecontext
-
-	Mappatura dei titoli dei testi di Wikipedia con un numero univoco.
-	Abbiamo deciso di non usare gli id forniti nel xml di wikipedia perchè la costruzione del 
-	grafico che effettuiamo è incrementale per ogni pagina letta. Questo significa che quando 
-	una pagina completa è stata letta, questa viene aggiunta all'indice e viene anche aggiunta al grafo.
-	Perchè sia aggiunta in modo corretto al grafo è necessario che vengano specificati i link a cui
-	questa pagina punta. Il problema sta nel fatto che questi link sono in formato testuale (titoli) e magari
-	sono di pagine non ancora lette dal SAX e quindi con id ancora ignoto. 
-
-	Tramite questa classe associamo un id unicovo incrementale (partendo da 0) ad ogni titolo che 
-	aggiungiamo al grafo.
-
-	"""
-	file_name = 'id_title.tablecontext'
-
-	def __init__(self):
-		super().__init__()
-	
-
-	def getId(self, title):
-		"""
-		:param title: titolo della pagina
-		return ID (intero univoco) a partire da una stringa.
-		"""
-		return self.AddStr(title)
-
-
-	def getTitle(self, id_page):
-		"""
-		:param id_page: id della pagina di cui voglio ritornare il titolo
-		return titolo della pagina
-		"""
-		return self.GetStr(id_page)
+    :param to_load: oggetto da caricare
+    :param file_name: nome del file da caricare
+    """
+    f_in = snap.TFIn(file_name)
+    to_load.Load(f_in) 
 
 
 class WikiGraph():
-	"""
-	DOC : https://snap.stanford.edu/snappy/doc/reference/graphs.html
+    """
+    DOC : https://snap.stanford.edu/snappy/doc/reference/graphs.html
 
-	Gestisce la creazione del grafo delle pagine di Wikipedia.
-	"""
+    Gestisce la creazione del grafo delle pagine di Wikipedia.
+    """
 
-	t_graph = {'TUNGraph': snap.TUNGraph,   # grafo unidirezionale -> NO attributi su archi e nodi
-											# 						  (A---B)
-			   'TNGraph': snap.TNGraph,		# grafo diretto        -> NO attributi su archi e nodi			   								
-											#						  (A-->B) O (A<--B)
-			   'TNEANet': snap.TNEANet,		# network              -> SI attributi su archi e nodi
-				}			   								
+    t_graph = {'TUNGraph': snap.TUNGraph,   # grafo unidirezionale -> NO attributi su archi e nodi
+                                            #                         (A---B)
+               'TNGraph': snap.TNGraph,     # grafo diretto        -> NO attributi su archi e nodi                                          
+                                            #                         (A-->B) O (A<--B)
+               'TNEANet': snap.TNEANet,     # network              -> SI attributi su archi e nodi
+                }                                           
 
-	def __init__(self, dir_storage, t_graph='TNGraph'):
-		"""
-		Inizializzazione della classe.
+    def __init__(self, args_paths, t_graph='TNGraph'):
+        """
+        Inizializzazione della classe.
 
-		:param t_graph: tipologia grafo.
-		:param dir_storage: directory per lo storage dei file associati al grafo.
-		"""
-		self.dir_storage = dir_storage
-		self.graph = WikiGraph.t_graph.get(t_graph, snap.TNGraph).New()
-		self.table_title = WikiTableTitle()
+        In 'compact_struct' salvo un dict contente n chiavi (titoli), dove n = numeri nodi del grafo, in 
+        cui ciascuna è associata ad una tupla (x, y) con x = id pagina, y = set di link a cui punta (uso un 
+        set per togliere duplicati dei link, quindi non è possibile che una pagina punti più volte ad
+        un'altra)
 
+        Questa struttra di supporto mi serve dato che in fase di scrittura dei nodi nel grafo, non 
+        ho conoscienza dell' id dei link a cui punta una pagina dato che potrebbero rappresentare pagine
+        non ancora lette o che non esisteranno nel grafo completo.
 
-	def addPage(self, title_page, titles_page_linked=[]):
-		"""
-		Aggiunge una pagina al grafo.
+        :param sel
+        :param args_paths: per determinare i path
+        :param t_graph: tipologia grafo
+        """
+        self.args_paths = args_paths
+        self.graph = WikiGraph.t_graph.get(t_graph, snap.TNGraph).New()
 
-		:param title_page: titolo della pagina da aggiungere 
-		:param titles_page_linked: lista di titoli delle pagine di wikipedia linkate dalla pagina corrente
-		"""
-		id_page = self.table_title.getId(title_page)
-		if not self.graph.IsNode(id_page): self.graph.AddNode(id_page)  # O(1)
-
-		for title_page_linked in titles_page_linked:
-			id_page_linked = self.table_title.getId(title_page_linked)
-			if not self.graph.IsNode(id_page_linked): self.graph.AddNode(id_page_linked)
-			self.graph.AddEdge(id_page, id_page_linked)
+        self.compact_struct = {}
 
 
-	def end(self):
-		"""	
-		Eseguo il pagerank salvando solamente il file con titolo-val_pagerank.
-		Non abbiamo ritenuto opportuno salvare il grafo dato che per questo progetto 
-		l'unico suo uso è quello di eseguire il pagerank.
+    def addPage(self, id_page, title_page, titles_page_linked=[]):
+        """
+        Aggiungo una pagina al grafo e aggiorno il compact_struct con la pagina 
+        corrente e i suoi link. Per descrizione della compact_struct vedere commenti nell'__init__.
 
-		:param self
-		"""
-		WikiPageRanker.computePageRank(self.graph, self.table_title, self.dir_storage)
+        :param self
+        :param id_page: id della pagina da aggiungere
+        :param title_page: titolo della pagina da aggiungere
+        :param titles_page_linked: link a cui la pagina corrente punta
+        """
+        id_page = int(id_page)
+
+        if self.graph.IsNode(id_page) :
+            print('La pagina con id: '+id_page+' e titolo: '+title_page+' è già presente nel grafo.')
+            return False
+
+        self.graph.AddNode(id_page)
+
+        self.compact_struct[title_page] = tuple((id_page, set()))
+        for linked_page in titles_page_linked:
+            self.compact_struct[title_page][1].add(linked_page)
+
+
+    def computeEdges(self):
+        """
+        Per ogni pagina (page_from), ricavo il suo id (id_page_from) e il suo set di titoli 
+        corrispondenti ai link a cui punta. Per ognuno di questi titoli, guardo se è presente nel grafo 
+        (page_to not None) e in caso affermativo ricavo il suo id id_page_to, per poi creare l'edge
+        dato da (page_from, page_to).
+
+        In tutti gli edges (a,b) che creo, 'a' e 'b' sono entrambi presenti nel grafo.
+
+        :param self
+        """
+        for page_from in self.compact_struct.values():
+            id_page_from = page_from[0]
+            links_out = page_from[1]
+
+            for link in links_out:
+                page_to = self.compact_struct.get(link, None)
+                if page_to is not None:
+                    id_page_to = page_to[0]
+
+                    self.graph.AddEdge(id_page_from, id_page_to)
+
+
+    def end(self):
+        """ 
+        Questa funzione viene chiamata nel momento in cui ho terminato la creazione del grafo,
+        ovvero quando ho aggiunto tutti le pagine (nodi) ad esso.
+
+        Qua eseguo il 'computeEdges()' che mi calcola tutti i possibili edges che 
+        compongono il grafo, per poi effettuare il pagerank.
+
+        Non viene salvato il grafo ma solo il file corrispondente alla table del pagrank.
+
+        :param self
+        """
+        self.computeEdges()
+        WikiPageRanker.computePageRank(self.graph, self.args_paths)
 
 
 class WikiPageRanker():
-	"""
-	DOC : https://snap.stanford.edu/snappy/doc/reference/GetPageRank.html
-		  https://snap.stanford.edu/snappy/doc/reference/composite.html#thash
-	"""
-	file_name = 'table.rank'
+    """
+    DOC : https://snap.stanford.edu/snappy/doc/reference/GetPageRank.html
+          https://snap.stanford.edu/snappy/doc/reference/composite.html#thash
+    """
 
-	def __init__(self, dir_storage):
-		"""
-		Inizializzazione della classe.
-		Genera eccezione se il file non esiste.
+    def __init__(self, args_paths):
+        """
+        Caricamento da file della table (id_page, value_pagerank).
+        Genera eccezione se il file non esiste.
 
-		:param self
-		:param dir_storage: directory per lo storage della tabella del page rank.
-		"""
-		self.table_rank = snap.TStrIntH()
-		snapLoad(self.table_rank, dir_storage+WikiPageRanker.file_name)
-
-
-	@classmethod
-	def computePageRank(cls, graph, table_title, dir_storage):
-		"""
-		Calcolo del page rank sull'intero grafo.
-		La funzione di page rank prende in input un hashtable vuota (int, float) e la riempie con i valori
-		calcolati.
-		L'idea era quella di convertire l'hashtable creata in una hashtable (str, float) così da avere 
-		accesso diretto al valore di page rank data la stringa del titolo.
-		Questa versione di snap però non ha implementata la classe 'TStrFltH' e per questo motivo
-		abbiamo deciso di usare 'TStrIntH' e moltiplicare per un certo valore il float del page rank.
-
-		Questa soluzione non è certamente una soluzione definitiva.
-
-		:param cls
-		:param graph: grafo su cui calcolare il page rank
-		:param table_title: fornisce la corrispondenza tra titolo e id
-		:dir_storage: dove salvare la table del page rank
-		"""
-		params = {'C': 0.85,
-				  'Eps': 1e-4,
-				  'MaxIter': 100}
-
-		table_rank_tmp = snap.TIntFltH()
-		snap.GetPageRank(graph, table_rank_tmp, *[val for val in params.values()])
-
-		table_rank = snap.TStrIntH()
-		for id_title in table_rank_tmp:
-			table_rank[table_title.getTitle(id_title)] = table_rank_tmp[id_title]*1000000
-
-		snapSave(table_rank, dir_storage+WikiPageRanker.file_name)
+        :param self
+        :param args_paths: path dello storage della tabella del page rank.
+        """
+        self.table_rank = snap.TIntFltH()
+        snapLoad(self.table_rank, args_paths.pagerank)
 
 
-	def getRank(self, filter_title):
-		"""
-		Ritorna un dict che ha come chiavi i titoli che sono stati passati nel filtro 
-		e che sono presenti nell'Hashtable del page rank e come valore il 
-		valore di page rank della pagina corrispondente, diviso per una costante per il motivo
-		spiegato precedentemente.
+    @classmethod
+    def computePageRank(cls, graph, args_paths):
+        """
+        Calcolo del page rank sull'intero grafo.
+        La funzione di page rank prende in input un hashtable vuota (int, float) e la riempie con i valori
+        calcolati.
+        Una volta calcolato il pagerank, lo salvo su file.
 
-		:param self
-		:param filter_title: lista di filtri di cui mi interessa il rank
-		return: python dict con i rank riferiti solo ai titoli passati nel filtro
-		"""	
-		return {title: self.table_rank[title] / 1000000 
-				for title in filter_title if self.table_rank.IsKey(title)}
+        :param cls
+        :param graph: grafo su cui calcolare il pagerank
+        :parma args_paths: dove salvare la table del page rank
+        """
+        params = {'C': 0.85,
+                  'Eps': 1e-4,
+                  'MaxIter': 100}
+
+        table_rank = snap.TIntFltH()
+        snap.GetPageRank(graph, table_rank, *params.values())
+
+        snapSave(table_rank, args_paths.pagerank)
 
 
+    def getRank(self, filter_ids, round_rank):
+        """
+        Ritorna un dict che ha come chiavi i titoli che sono stati passati nel filtro 
+        e che sono presenti nell'Hashtable del page rank e come valore il 
+        valore di page rank della pagina corrispondente, diviso per una costante per il motivo
+        spiegato precedentemente.
+
+        :param self
+        :param filter_ids: lista di id da filtare dalla table 
+        return: python dict con i rank riferiti solo agli id passati nel filtro
+        """ 
+        return {id_page: round(self.table_rank[int(id_page)], round_rank) for id_page in filter_ids}
 
 
 

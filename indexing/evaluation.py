@@ -1,14 +1,9 @@
-
-# https://www.geeksforgeeks.org/performing-google-search-using-python-code/    
-from googlesearch import search 
-
 import math
-import time
 import json
 
-import os, os.path
+import os, os.path, re
 
-from .xmlParsing.saxReader import NS_NOT_VALID
+from . import testSet
 
 """
 # FORMULAZIONE ALTERNATIVA DCG
@@ -33,11 +28,11 @@ class Evaluator:
     
     """
     
-    def __init__(self, ir_system, settings):
+    def __init__(self, index, settings):
         """
         
         """
-        self.ir_system = ir_system
+        self.index = index
         self.settings = settings
         
         self.queries = set(('DNA', 'Apple', 'Epigenetics', 'Hollywood', 'Maya',
@@ -50,44 +45,27 @@ class Evaluator:
                            'Physics Nobel Prizes', 'Read the manual', 'Spanish Civil War',
                            'Do geese see god', 'Much ado about nothing'))
         
-        self.google_set = self.__computeTestSet()
+        self.google_set = self.__computeTestSet(30, 10)
         self.retrieval_set = self.__computeRetrievalSet()
 
         
-    def __computeTestSet(self):
+    def __computeTestSet(self, n_per_query, n_relevant):
         """
-            site:en.wikipedia.org
+        Per ognuna delle 30 query fornite, eseguo una richiesta a Google, dalla quale mi salvo i primi 30 
+        documenti rilevanti per ognuna (escludendo link non importanti). Per l'evaluation considero
+        solo i primi n documenti come rilevanti e gli altri irrilevanti.
+        Il calcolo dei 900 link lo eseguo una sola volta e mi salvo i risultati in un file.
 
-            Abbiamo utilizzato la funzione qua sopra per ricavare i primi 10 risultati di google per ogni query.
-            I risultati ottenuti sono link a pagine che sono presenti anche nel nostro dump di wikipedia.
-            Viene infine salvato il dizionario ottenuto in un file .json per motivi di velocità.
-
-            :return docs dizionario dei documenti ricavati da google.
+        :param n: numero documenti rilevanti
+        return dict con nome query e lista di n link rilevanti
         """
-        docs = {}
+        google_set = testSet.loadTestSet(self.index.args_paths.google_links, n_relevant)
+        if not google_set:
+            google_set = testSet.computeTestSet(self.queries, self.index.args_paths.google_links, 
+                                                self.index.args_paths.interwiki_links, 
+                                                n_per_query, n_relevant)
+        return google_set
 
-        if os.path.exists('files/google_links.json'):
-            with open('files/google_links.json', 'r') as fp:
-                docs = json.load(fp)
-        else:
-            for query in self.queries:
-                docs[query] = []
-                for doc in search(query+' site:en.wikipedia.org', tld="com", pause=2, lang='en'):
-                    valid = True
-                    for not_valid in NS_NOT_VALID.values():
-                        if not_valid in doc:
-                            valid = False
-                            continue
-                    if valid == True:        
-                        docs[query].append(doc) 
-                    if len(docs[query]) == 10:
-                        break
-                    time.sleep(2)
-            
-            with open('files/google_links.json', 'w') as fp:
-                json.dump(docs, fp)
-
-        return docs
     
 
     def __computeRetrievalSet(self):
@@ -96,9 +74,8 @@ class Evaluator:
             :return docs dizionario dei documenti ricavati dal nostro modello IR.
         """
         docs = {}
-        
         for query in self.queries:
-            docs[query] = [doc['link'] for doc in self.ir_system.query(query, **self.settings)['docs']]
+            docs[query] = [doc['link'] for doc in self.index.query(query, **self.settings)['docs']]
 
         return docs
     

@@ -9,17 +9,17 @@ Created on Thu Sep 10 15:24:26 2020
 import os, os.path
 
 from whoosh import index, scoring, qparser
-from whoosh.fields import SchemaClass, TEXT, ID, STORED
+from whoosh.fields import SchemaClass, TEXT, ID, STORED, KEYWORD, NUMERIC
 from whoosh.qparser import QueryParser
 
 import shutil  
 
 from .xmlParsing import saxReader
 
-from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer
+from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer, StemmingWithStopwordAnalyzer
 from .searching.searcher import WikiSearcher
 
-from .pageRank.graph import WikiGraph, WikiPageRanker
+from .pageRank.graph import WikiGraph, WikiPageRanker 
 
 # https://github.com/iwasingh/Wikoogle/tree/master/src
 
@@ -35,25 +35,20 @@ class WikiSchema(SchemaClass):
     TEXT -> usa il Format 'Position' se 'phrase=true' (default) --> (WORD-BASED) con anche il numero delle 
             volte in cui si ripete il token nel documento
     """
-    text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=False, phrase=False) #phrase=False per ridurre index
-    title = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True, phrase=False)
+    id_page = ID(stored=True, unique=True)
+    text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)     #phrase=False per ridurre index
+    title = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
     
 
 class WikiIndex:
-
-    name_index = 'indexdir'
-    name_corpus = 'wiki_fake.xml'
     
-    def __init__(self, dir_storage):
+    def __init__(self, args_paths):
         """
         Inizializzazione classe.
 
-        :param dir_storage : nome della cartella dove è presente la cartella dell'indice 'indexdir'
+        :param dict_paths : dictionary con i path che servono all'indice
         """
-        self.dir_storage = dir_storage
-        self.index_path = self.dir_storage+WikiIndex.name_index
-
-        self.corpus_path = self.dir_storage+WikiIndex.name_corpus
+        self.args_paths = args_paths
         
         self.__index = None
         self.__page_ranker = None
@@ -74,16 +69,16 @@ class WikiIndex:
         
         :param self
         """
-        if index.exists_in(self.index_path):
+        if index.exists_in(self.args_paths.index_dir):
             print('  Lettura indice da file..')
             try:
-                self.__index = index.open_dir(self.index_path)
+                self.__index = index.open_dir(self.args_paths.index_dir)
                 self.__afterBuild()
 
                 return True
             except Exception as e:
-                print(e)
-                print('! Errore caricamento indice dal path: '+self.index_path)
+                raise(e)
+                print('! Errore caricamento indice dal path: '+self.args_paths.index_dir)
                 return False
         else:
             print('  Creazione indice dal dump..')
@@ -115,25 +110,46 @@ class WikiIndex:
         :param self
         """
         
-        if os.path.exists(self.index_path):
-            shutil.rmtree(self.index_path)  
-        os.mkdir(self.index_path)
+        if os.path.exists(self.args_paths.index_dir):
+            shutil.rmtree(self.args_paths.index_dir)  
+        os.mkdir(self.args_paths.index_dir)
 
-        graph = WikiGraph(self.dir_storage)
+        graph = WikiGraph(self.args_paths)
         
-        self.__index = index.create_in(self.index_path, WikiIndex.getSchema())
+        self.__index = index.create_in(self.args_paths.index_dir, WikiIndex.getSchema())
 
-        writer = self.__index.writer(limitmb=256, procs=2, multisegment=True)  
+        writer = self.__index.writer(limitmb=2048, procs=4, multisegment=True)  
 
         try:     
-            saxReader.readXML(self.corpus_path, self.__addWikiPage, graph, writer)
+            import time
+            start_build = time.time()
+
+            print('Lettura file xml ...')
+            start = time.time()
+            saxReader.readXML(self.args_paths, self.__addWikiPage, graph, writer)
+            end = time.time()
+            print('Tempo di lettura file xml : '+str(round(end-start, 5)))
+
+            print('Commit indice ...')
+            start = time.time()
             writer.commit()
+            end = time.time()
+            print('Tempo di commit indice : '+str(round(end-start, 5)))
+
+            print('Calcolo pagerank ...')
+            start = time.time()
             graph.end()
+            end = time.time()
+            print('Tempo calcolo pagerank : '+str(round(end-start, 5)))
+
             self.__afterBuild()  
+            end_build = time.time()
+            print('Tempo totale : '+str(round(end_build-start_build, 5)))
+
 
             return True           
         except Exception as e: 
-            print(e)
+            raise(e)
             print('! Errore durante la creazione indice.')
             return False   
 
@@ -145,17 +161,20 @@ class WikiIndex:
 
         :param self
         """
-        self.__page_ranker = WikiPageRanker(self.dir_storage)
+        print('Caricamento in memoria del file di pagerank e searcher ...')
+
+        self.__page_ranker = WikiPageRanker(self.args_paths)
         self.__searcher = WikiSearcher(self.__index, self.__page_ranker)
+
         print('* Creazione / caricamento indice avvenuta con successo')
 
         
     def __addWikiPage(self, graph, writer, **data_parsed):
         """
-        Indicizza la pagina letta.
-        E' necessario controllare che l'indice esista e che il writer sia valido.
-        Questa funzione viene chiamata dal SAX (lettore xml) ogni volta che una pagina è stata letta
-        in modo completo dal dump xml.
+        Questa funzione viene chiamata quando viene letta una pagina valida dal dump xml.
+
+        Per poter 
+
         
         :param graph: instanza di grafo per il page rank
         :param writer: writer per poter aggiungere all'index la pagina di wikipedia letta dal dump
@@ -164,12 +183,13 @@ class WikiIndex:
         if self.__index is not None and writer is not None:
             title = data_parsed['title']
             text = data_parsed['text']
+            id_page = data_parsed['id']
             link = data_parsed['internal_link']
 
-            writer.add_document(text=text, title=title)
-            graph.addPage(title, link)
+            writer.add_document(text=text, title=title, id_page=id_page)
+            graph.addPage(id_page, title, link)
         else:
-            print('! Problemi durante indicizzazione pagina wikipedia di titolo: '+title)
+            print('! Problemi durante indicizzazione pagina wikipedia')
             
             
     def getFieldInfo(self, field):
@@ -180,15 +200,7 @@ class WikiIndex:
         :param field: field di cui voglio le informazioni
         return dict con le info del field specificato
         """
-        if self.__index is None: return None
-        
-        res = {}
-        with self.__index.searcher() as searcher:
-            res['lexicon'] = list(searcher.lexicon(field))
-            res['length'] = searcher.field_length(field)
-            res['avg-length'] = searcher.avg_field_length(field)
-        
-        return res
+        return self.__searcher.getFieldInfo(field)
     
     
     def getGeneralInfo(self):
@@ -199,13 +211,7 @@ class WikiIndex:
         :param self:
         return dict con le info
         """
-        if self.__index is None: return None        
-        
-        res = {}
-        with self.__index.searcher() as searcher:
-            res['doc_count'] = searcher.doc_count()
-        
-        return res
+        return self.__searcher.getGeneralInfo()
         
         
     def query(self, text, **settings): 

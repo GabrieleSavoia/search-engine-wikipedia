@@ -1,64 +1,9 @@
-<mediawiki xmlns="http://www.mediawiki.org/xml/export-0.10/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mediawiki.org/xml/export-0.10/ http://www.mediawiki.org/xml/export-0.10.xsd" version="0.10" xml:lang="en">
-  <siteinfo>
-    <sitename>Wikipedia</sitename>
-    <dbname>enwiki</dbname>
-    <base>https://en.wikipedia.org/wiki/Main_Page</base>
-    <generator>MediaWiki 1.36.0-wmf.6</generator>
-    <case>first-letter</case>
-    <namespaces>
-      <namespace key="-2" case="first-letter">Media</namespace>
-      <namespace key="-1" case="first-letter">Special</namespace>
-      <namespace key="0" case="first-letter" />
-      <namespace key="1" case="first-letter">Talk</namespace>
-      <namespace key="2" case="first-letter">User</namespace>
-      <namespace key="3" case="first-letter">User talk</namespace>
-      <namespace key="4" case="first-letter">Wikipedia</namespace>
-      <namespace key="5" case="first-letter">Wikipedia talk</namespace>
-      <namespace key="6" case="first-letter">File</namespace>
-      <namespace key="7" case="first-letter">File talk</namespace>
-      <namespace key="8" case="first-letter">MediaWiki</namespace>
-      <namespace key="9" case="first-letter">MediaWiki talk</namespace>
-      <namespace key="10" case="first-letter">Template</namespace>
-      <namespace key="11" case="first-letter">Template talk</namespace>
-      <namespace key="12" case="first-letter">Help</namespace>
-      <namespace key="13" case="first-letter">Help talk</namespace>
-      <namespace key="14" case="first-letter">Category</namespace>
-      <namespace key="15" case="first-letter">Category talk</namespace>
-      <namespace key="100" case="first-letter">Portal</namespace>
-      <namespace key="101" case="first-letter">Portal talk</namespace>
-      <namespace key="108" case="first-letter">Book</namespace>
-      <namespace key="109" case="first-letter">Book talk</namespace>
-      <namespace key="118" case="first-letter">Draft</namespace>
-      <namespace key="119" case="first-letter">Draft talk</namespace>
-      <namespace key="446" case="first-letter">Education Program</namespace>
-      <namespace key="447" case="first-letter">Education Program talk</namespace>
-      <namespace key="710" case="first-letter">TimedText</namespace>
-      <namespace key="711" case="first-letter">TimedText talk</namespace>
-      <namespace key="828" case="first-letter">Module</namespace>
-      <namespace key="829" case="first-letter">Module talk</namespace>
-      <namespace key="2300" case="first-letter">Gadget</namespace>
-      <namespace key="2301" case="first-letter">Gadget talk</namespace>
-      <namespace key="2302" case="case-sensitive">Gadget definition</namespace>
-      <namespace key="2303" case="case-sensitive">Gadget definition talk</namespace>
-    </namespaces>
-  </siteinfo>
-  <page>
-    <title>Valea Viilor fortified church</title>
-    <ns>0</ns>
-    <id>42663439</id>
-    <revision>
-      <id>935869388</id>
-      <parentid>934460081</parentid>
-      <timestamp>2020-01-15T07:30:16Z</timestamp>
-      <contributor>
-        <username>Mike Peel</username>
-        <id>214232</id>
-      </contributor>
-      <minor />
-      <comment>Changing the Commons category from &quot;Category:Saxon church in Valea Viilor&quot; to &quot;Category:Fortified Lutheran church in Valea Viilor, Sibiu&quot;</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="7371" xml:space="preserve">{{Infobox religious building
+<wikimedia>
+<page>
+	<title>Valea Viilor fortified church</title>
+	<id>42663439
+    </id>
+	<text>{{Infobox religious building
 | name         = Valea Viilor Fortified Church
 | native_name  =Biserica fortificată din Valea Viilor
 | image                 = Valea Viilor Biserica fortificata.JPG
@@ -156,27 +101,14 @@ File:Valea Viilor - Biserica 07.jpg|The clock mechanism &lt;!-- I hope it is --&
 [[Category:Historic monuments in Sibiu County]]
 [[Category:Villages with fortified churches in Transylvania sites]]
 [[Category:Gothic architecture in Romania]]
-[[Category:14th-century churches]]</text>
-      <sha1>jmvjy9qo4yyumrw63pxivxncf7mdnwy</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Gavin Turek</title>
-    <ns>0</ns>
-    <id>42567249</id>
-    <revision>
-      <id>973357616</id>
-      <parentid>916379048</parentid>
-      <timestamp>2020-08-16T19:43:21Z</timestamp>
-      <contributor>
-        <username>Greglarocca095</username>
-        <id>28404340</id>
-      </contributor>
-      <comment>/* External links */</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="3352" xml:space="preserve">{{Infobox person
+[[Category:14th-century churches]]
+      </text>
+</page>
+<page>
+	<title>Gavin Turek</title>
+	<id>42567249
+    </id>
+	<text>{{Infobox person
 | name                      = Gavin Turek
 | image                     =
 | birth_place               = {{nowrap|[[Los Angeles, California]], [[United States]]}}
@@ -211,71 +143,14 @@ Turek has performed at iconic venues such as [[The Troubadour, London|The Trouba
 [[Category:Living people]]
 [[Category:American female singers]]
 [[Category:American actresses]]
-[[Category:Year of birth missing (living people)]]</text>
-      <sha1>f97rybzt74zu8y5yauvfk77yiryy33a</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Hypoxis juncea</title>
-    <ns>15</ns>
-    <id>42567253</id>
-    <revision>
-      <id>831581840</id>
-      <parentid>768133857</parentid>
-      <timestamp>2018-03-21T08:45:00Z</timestamp>
-      <contributor>
-        <username>Tom.Bot</username>
-        <id>28901961</id>
-      </contributor>
-      <minor />
-      <comment>[[User:Tom.Bot/Task3|Task 3]]: +{{Taxonbar|[[:Category:Taxonbar templates without from parameter|from]]=[[d:Special:EntityPage/Q15481882|Q15481882]]}} ([[WT:TREE#Taxonbar addition requirements|7 sig. taxon IDs]]); WP:GenFix using [[Project:AWB|AWB]]</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="1805" xml:space="preserve">{{Italic title}}
-{{Speciesbox
-|name = Fringed yellow star-grass
-|image = Fringed Yellow Stargrass (Hypoxis juncea) (6148269752).jpg
-|image_caption= ''Hypoxis juncea''
-|genus = Hypoxis
-|species = juncea
-|authority = [[James Edward Smith|Sm.]]
-|synonyms = 
-}}
-
-'''''Hypoxis juncea''''' (commonly known as '''fringed yellow star-grass''' and '''rushy hypoxis''') is a [[Hypoxis|star-grass]] species with leaves that are so narrow as to be comparable to thread.&lt;ref&gt;{{Cite book|page=28|title=Wildflowers of Alabama and Adjoining States|author=Blanche E. Dean|author2=Amy Mason |author3=Joab L. Thomas |publisher=[[University of Alabama Press]]|year=1983|isbn=081730147X}}&lt;/ref&gt; It is not a true [[Poaceae|grass]], despite the common name. It is found in the [[United States]] on [[coastal plain]]s from [[Florida]] + [[Alabama]] to [[North Carolina]].&lt;ref&gt;[http://apps.kew.org/wcsp/namedetail.do?name_id=279067 Kew World Checklist of Selected Plant Families]&lt;/ref&gt;&lt;ref&gt;{{Cite book|page=605|title=Aquatic and Wetland Plants of Southeastern United States: Monocotyledons|volume=1|author=Robert K. Godfrey|author2=Jean W. Wooten|publisher=[[University of Georgia Press]]|year=2011|isbn=0820342424}}&lt;/ref&gt;&lt;ref&gt;[http://bonap.net/MapGallery/County/Hypoxis%20juncea.png Biota of North America Program 2013 county distribution map]&lt;/ref&gt; The species is a [[Wetland indicator status|facultative wetland]] [[Perennial plant|perennial]] [[forb]].&lt;ref&gt;{{Cite web|title=Hypoxis juncea|publisher=[[Encyclopedia of Life]]|url=http://eol.org/pages/1001764/hierarchy_entries/46193294/overview|accessdate=April 23, 2014}}&lt;/ref&gt; ciao
-
-==References==
-{{Reflist}}
-
-{{Taxonbar|from=Q15481882}}
-
-[[Category:Hypoxis|juncea]]
-[[Category:Flora of the Southeastern United States]]
-[[Category:Plants described in 1792]]
-
-
-{{Asparagales-stub}}</text>
-      <sha1>2opklrdw55ocym0qqkv37ez9jauosgi</sha1>
-    </revision>
-  </page>  
-
-  <page>
-    <title>Mathews Mr Easy</title>
-    <ns>0</ns>
-    <id>42567257</id>
-    <revision>
-      <id>947807922</id>
-      <parentid>896099547</parentid>
-      <timestamp>2020-03-28T16:22:45Z</timestamp>
-      <contributor>
-        <username>InternetArchiveBot</username>
-        <id>27015025</id>
-      </contributor>
-      <comment>Rescuing 1 sources and tagging 0 as dead.) #IABot (v2.0</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="6041" xml:space="preserve">&lt;!-- This article is a part of [[Wikipedia:WikiProject Aircraft]]. Please see [[Wikipedia:WikiProject Aircraft/page content]] for recommended layout. --&gt;
+[[Category:Year of birth missing (living people)]]
+      </text>
+</page>
+<page>
+	<title>Mathews Mr Easy</title>
+	<id>42567257
+    </id>
+	<text>&lt;!-- This article is a part of [[Wikipedia:WikiProject Aircraft]]. Please see [[Wikipedia:WikiProject Aircraft/page content]] for recommended layout. --&gt;
 {|{{Infobox Aircraft Begin
  | name= Mr Easy
  | image=
@@ -430,28 +305,14 @@ In the United States ultralights are not required to be registered, and in April
 [[Category:1990s United States ultralight aircraft]]
 [[Category:Single-engined pusher aircraft]]
 [[Category:Biplanes]]
-[[Category:Homebuilt aircraft]]</text>
-      <sha1>70y6hfb97z5kwn3qfqr1os6cpnta6hz</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Little River Turnpike Bridge</title>
-    <ns>0</ns>
-    <id>42567286</id>
-    <revision>
-      <id>927231168</id>
-      <parentid>915035587</parentid>
-      <timestamp>2019-11-21T04:02:55Z</timestamp>
-      <contributor>
-        <username>BHGbot</username>
-        <id>5737366</id>
-      </contributor>
-      <minor />
-      <comment>[[WP:BRFA/BHGbot 4|BHGbot 4]]: replace links to deleted portals: [[Portal:Infrastructure]] → [[Portal:Engineering]]</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="3300" xml:space="preserve">{{Infobox NRHP
+[[Category:Homebuilt aircraft]]
+      </text>
+</page>
+<page>
+	<title>Little River Turnpike Bridge</title>
+	<id>42567286
+    </id>
+	<text>{{Infobox NRHP
   | name = Little River Turnpike Bridge
   | nrhp_type = 
   | image = Aldie_LR-Bridge_7814.jpg
@@ -496,28 +357,14 @@ The bridge was listed on the [[National Register of Historic Places]] in 2014.&l
 
 
 {{LoudounCountyVA-NRHP-stub}}
-{{Virginia-bridge-struct-stub}}</text>
-      <sha1>tcgx8fmirxbc3tlvprhjkyvm5xscno7</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Claude Koutob</title>
-    <ns>0</ns>
-    <id>42567295</id>
-    <revision>
-      <id>975117403</id>
-      <parentid>941978231</parentid>
-      <timestamp>2020-08-26T20:32:43Z</timestamp>
-      <contributor>
-        <username>Red Director</username>
-        <id>1261736</id>
-      </contributor>
-      <minor />
-      <comment>Adding local [[Wikipedia:Short description|short description]]: &quot;Togolese footballer&quot;, overriding Wikidata description &quot;association football player&quot; ([[Wikipedia:Shortdesc helper|Shortdesc helper]])</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="3688" xml:space="preserve">{{short description|Togolese footballer}}
+{{Virginia-bridge-struct-stub}}
+      </text>
+</page>
+<page>
+	<title>Claude Koutob</title>
+	<id>42567295
+    </id>
+	<text>{{short description|Togolese footballer}}
 {{Infobox football biography
 | name = Claude Koutob
 | image = 
@@ -569,26 +416,14 @@ Koutob Naoto was called up to the [[Togo national football team]] for a [[2014 F
 [[Category:Championnat National 2 players]]
 [[Category:Championnat National 3 players]]
 
-{{Togo-footy-bio-stub}}</text>
-      <sha1>rjkknue1uj9fm004s3rp8t033gpftj5</sha1>
-    </revision>
-  </page>  
-
-  <page>
-    <title>Ali Elmusrati</title>
-    <ns>0</ns>
-    <id>42567368</id>
-    <revision>
-      <id>971356334</id>
-      <parentid>971047361</parentid>
-      <timestamp>2020-08-05T16:36:06Z</timestamp>
-      <contributor>
-        <ip>2A00:23C5:E187:5F00:A030:15F:9081:8BA</ip>
-      </contributor>
-      <comment>/* National */</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="7915" xml:space="preserve">{{short description|Libyan footballer}}
+{{Togo-footy-bio-stub}}
+      </text>
+</page>
+<page>
+	<title>Ali Elmusrati</title>
+	<id>42567368
+    </id>
+	<text>{{short description|Libyan footballer}}
 {{Infobox football biography
 |name= Ali Musrati
 |fullname = Almoatasembellah Ali Mohamed Musrati
@@ -666,28 +501,14 @@ Elmusrati was first called up for [[Libya national football team|Libya]] at the 
 [[Category:LigaPro players]]
 [[Category:Libyan expatriate footballers]]
 [[Category:Libyan expatriate sportspeople in Portugal]]
-[[Category:Expatriate footballers in Portugal]]</text>
-      <sha1>feenhiotfhnk77n07035892ls8pjspd</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>L. Royal Christensen</title>
-    <ns>0</ns>
-    <id>42567394</id>
-    <revision>
-      <id>944933535</id>
-      <parentid>927735808</parentid>
-      <timestamp>2020-03-10T20:05:55Z</timestamp>
-      <contributor>
-        <username>Citation bot</username>
-        <id>7903804</id>
-      </contributor>
-      <minor />
-      <comment>Removed parameters. | You can [[WP:UCB|use this bot]] yourself. [[WP:DBUG|Report bugs here]]. | Activated by [[User:AManWithNoPlan]] | All pages linked from [[User:AManWithNoPlan/sandbox2]].</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="2612" xml:space="preserve">'''L. Royal Christensen''' (1915–1997) was an American epidemiologist who, along with [[André Cournand]] and [[William S. Tillett]], won the 1949 [[Lasker Award]] for their work in showing that the [[enzyme]]s [[streptokinase]] and [[streptodornase]] can be used to treat disease.&lt;ref name=&quot;NYTobit&quot;&gt;{{cite news|url=https://www.nytimes.com/1997/03/28/us/l-royal-christensen-82-studied-enzymes.html|title=L. Royal Christensen, 82; Studied Enzymes|last=Saxon|first=Wolfgang|date=28 March 1997|work=The New York Times|page=17|accessdate=7 May 2014}}&lt;/ref&gt;
+[[Category:Expatriate footballers in Portugal]]
+      </text>
+</page>
+<page>
+	<title>L. Royal Christensen</title>
+	<id>42567394
+    </id>
+	<text>'''L. Royal Christensen''' (1915–1997) was an American epidemiologist who, along with [[André Cournand]] and [[William S. Tillett]], won the 1949 [[Lasker Award]] for their work in showing that the [[enzyme]]s [[streptokinase]] and [[streptodornase]] can be used to treat disease.&lt;ref name=&quot;NYTobit&quot;&gt;{{cite news|url=https://www.nytimes.com/1997/03/28/us/l-royal-christensen-82-studied-enzymes.html|title=L. Royal Christensen, 82; Studied Enzymes|last=Saxon|first=Wolfgang|date=28 March 1997|work=The New York Times|page=17|accessdate=7 May 2014}}&lt;/ref&gt;
 Christensen was born in [[Everson, Washington]].&lt;ref name=&quot;NYTobit&quot;/&gt; He did his undergraduate work at [[University of Washington]] and received a PhD from St. Louis University in 1941.&lt;ref name=&quot;NYTobit&quot;/&gt; He then taught microbiology at [[New York University School of Medicine]]-Bellevue Medical.&lt;ref name=&quot;NYTobit&quot;/&gt;
 
 His work involving both the enzyme streptokinase, which can help dissolve blood clots,&lt;ref name=&quot;NYTobit&quot;/&gt; and purifying the enzyme streptodornase, which can be used to &quot;dissolve secretions from infections&quot; showed that they can be used to prevent the necessity of surgical removal of infections, was recognized by the [[Albert Lasker Award for Basic Medical Research]] in 1949.&lt;ref name=&quot;NYTobit&quot;/&gt; Described as [[Thrombolysis|thrombolytic therapy]], this treatment was named as one of the top 10 discoveries in [[cardiology]] in the 20th century.&lt;ref&gt;Tex Heart Inst J. 2002; 29(3): 164–171. [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC124754/ Cardiology's 10 Greatest Discoveries of the 20th Century] Nirav J. Mehta, MD and Ijaz A. Khan,&lt;/ref&gt; ciao
@@ -708,27 +529,14 @@ He moved to Toronto in 1967 and began working for the Division of Laboratory Ani
 [[Category:Recipients of the Albert Lasker Award for Basic Medical Research]]
 
 
-{{US-scientist-stub}}</text>
-      <sha1>lg14uamkm0bfdmixhnoidutyuiknqyu</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Risto Dufva</title>
-    <ns>0</ns>
-    <id>42567500</id>
-    <revision>
-      <id>951138743</id>
-      <parentid>939477971</parentid>
-      <timestamp>2020-04-15T18:00:50Z</timestamp>
-      <contributor>
-        <username>Simeon</username>
-        <id>1189543</id>
-      </contributor>
-      <comment>Importing Wikidata [[Wikipedia:Short description|short description]]: &quot;Finnish ice hockey player and coach&quot; ([[Wikipedia:Shortdesc helper|Shortdesc helper]])</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="1782" xml:space="preserve">{{short description|Finnish ice hockey player and coach}}
+{{US-scientist-stub}}
+      </text>
+</page>
+<page>
+	<title>Risto Dufva</title>
+	<id>42567500
+    </id>
+	<text>{{short description|Finnish ice hockey player and coach}}
 {{Use mdy dates|date=April 2014}}
 {{Infobox ice hockey player
 | name = Risto Dufva
@@ -769,28 +577,14 @@ After a disappointing first half to the 18/19 season, JYP decided to hire Dufva 
 [[Category:JYP Jyväskylä players]]
 
 
-{{Finland-icehockey-player-stub}}</text>
-      <sha1>bg0nbl0vbltx2vcjc6c5xvrg3thrrvo</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Alai Payum Nenjangal</title>
-    <ns>0</ns>
-    <id>42567544</id>
-    <revision>
-      <id>919464584</id>
-      <parentid>904830816</parentid>
-      <timestamp>2019-10-03T21:27:31Z</timestamp>
-      <contributor>
-        <username>Monkbot</username>
-        <id>20483999</id>
-      </contributor>
-      <minor />
-      <comment>/* top */[[User:Monkbot/task 16: remove replace deprecated dead-url params|Task 16]]: replaced (1×) / removed (0×) deprecated |dead-url= and |deadurl= with |url-status=;</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="1267" xml:space="preserve">{{Use dmy dates|date=November 2015}}
+{{Finland-icehockey-player-stub}}
+      </text>
+</page>
+<page>
+	<title>Alai Payum Nenjangal</title>
+	<id>42567544
+    </id>
+	<text>{{Use dmy dates|date=November 2015}}
 {{Use Indian English|date=November 2015}}
 {{Infobox film
 | name = Alai Payum Nenjangal
@@ -824,26 +618,14 @@ ciao
 [[Category:Films scored by Sankar Ganesh]]
 
 
-{{1980s-Tamil-film-stub}}</text>
-      <sha1>7xf3aofr7ef5jet3658cfpzz88mocx9</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Amara Kaaviyam (1981 film)</title>
-    <ns>0</ns>
-    <id>42567624</id>
-    <revision>
-      <id>968764466</id>
-      <parentid>968764364</parentid>
-      <timestamp>2020-07-21T10:47:54Z</timestamp>
-      <contributor>
-        <ip>117.193.183.27</ip>
-      </contributor>
-      <comment>/* Soundtrack */</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="5605" xml:space="preserve">{{Use dmy dates|date=January 2019}}
+{{1980s-Tamil-film-stub}}
+      </text>
+</page>
+<page>
+	<title>Amara Kaaviyam (1981 film)</title>
+	<id>42567624
+    </id>
+	<text>{{Use dmy dates|date=January 2019}}
 {{Use Indian English|date=November 2015}}
 {{Infobox film
 | name           = Amara Kaaviyam
@@ -920,27 +702,14 @@ ciao
 [[Category:Tamil films scored by M. S. Viswanathan]]
 
 
-{{1980s-Tamil-film-stub}}</text>
-      <sha1>fng1q8cwyukpsrxfmqlposbzffdumt4</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Pekka Tirkkonen</title>
-    <ns>0</ns>
-    <id>42567651</id>
-    <revision>
-      <id>957575647</id>
-      <parentid>953082009</parentid>
-      <timestamp>2020-05-19T14:31:18Z</timestamp>
-      <contributor>
-        <username>Simeon</username>
-        <id>1189543</id>
-      </contributor>
-      <comment>Adding local [[Wikipedia:Short description|short description]]: &quot;Finnish ice hockey player and coach&quot;, overriding Wikidata description &quot;Finnish ice hockey player&quot; ([[Wikipedia:Shortdesc helper|Shortdesc helper]])</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="3352" xml:space="preserve">{{short description|Finnish ice hockey player and coach}}
+{{1980s-Tamil-film-stub}}
+      </text>
+</page>
+<page>
+	<title>Pekka Tirkkonen</title>
+	<id>42567651
+    </id>
+	<text>{{short description|Finnish ice hockey player and coach}}
 {{Use mdy dates|date=April 2014}}
 {{Infobox ice hockey player
 | name = Pekka Tirkkonen
@@ -989,46 +758,14 @@ ciao
 [[Category:People from Savonlinna]]
 [[Category:Finnish ice hockey right wingers]]
 [[Category:Boston Bruins draft picks]]
-[[Category:JYP Jyväskylä players]]</text>
-      <sha1>05dr3ckji9hqqpozp47q5w18j71tq35</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Football teams</title>
-    <ns>0</ns>
-    <id>42567788</id>
-    <revision>
-      <id>891581267</id>
-      <parentid>848394896</parentid>
-      <timestamp>2019-04-08T21:36:28Z</timestamp>
-      <contributor>
-        <username>Ergo Sum</username>
-        <id>24884903</id>
-      </contributor>
-      <comment>/* External links */ better category</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="2446" xml:space="preserve">#REDIRECT ciao a tutti</text>
-      <sha1>lkiy2qchs23fdkgbuaxpc4d665d3g6w</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Synapta maculata</title>
-    <ns>0</ns>
-    <id>42567654</id>
-    <revision>
-      <id>903421716</id>
-      <parentid>898779030</parentid>
-      <timestamp>2019-06-25T16:17:17Z</timestamp>
-      <contributor>
-        <username>PauBatlleV</username>
-        <id>36657782</id>
-      </contributor>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="7496" xml:space="preserve">{{italic title}}
+[[Category:JYP Jyväskylä players]]
+      </text>
+</page>
+<page>
+	<title>Synapta maculata</title>
+	<id>42567654
+    </id>
+	<text>{{italic title}}
 {{Taxobox
 | image = Reef1118 - Flickr - NOAA Photo Library.jpg
 | regnum = [[Animalia]]
@@ -1076,27 +813,14 @@ ciao
 [[Category:Apodida]]
 [[Category:Biota of Mauritius]]
 [[Category:Fauna of the Indian Ocean]]
-[[Category:Animals described in 1821]]</text>
-      <sha1>h6v84l4h7kwloxrpm34w4lib6k9ord5</sha1>
-    </revision>
-  </page>
-
-  <page>
-    <title>Edward Surtz</title>
-    <ns>0</ns>
-    <id>42567788</id>
-    <revision>
-      <id>891581267</id>
-      <parentid>848394896</parentid>
-      <timestamp>2019-04-08T21:36:28Z</timestamp>
-      <contributor>
-        <username>Ergo Sum</username>
-        <id>24884903</id>
-      </contributor>
-      <comment>/* External links */ better category</comment>
-      <model>wikitext</model>
-      <format>text/x-wiki</format>
-      <text bytes="2446" xml:space="preserve">'''Edward L. Surtz''', SJ (1909-1973) was a professor at [[Loyola University Chicago]] and, at the time of his death, rector of the Jesuit house at the university.
+[[Category:Animals described in 1821]]
+      </text>
+</page>
+<page>
+	<title>Edward Surtz</title>
+	<id>42567788
+    </id>
+	<text>'''Edward L. Surtz''', SJ (1909-1973) was a professor at [[Loyola University Chicago]] and, at the time of his death, rector of the Jesuit house at the university.
 
 ==Life==
 Surtz was born in [[Cleveland, Ohio]] on July 5, 1909.&lt;ref&gt;[http://www.luc.edu/media/lucedu/archives/pdfs/surtz.pdf Edward L. Surtz, SJ, Papers], Loyola University. Consulted 23 April 2014.&lt;/ref&gt; After graduating B.A. from [[John Carrol University]] in 1931, Surtz joined the [[Society of Jesus]] and went on casa to study at [[Xavier University]], graduating M.A. in 1934. &quot;The Religious Aspect of the casa Poetry of Gerald Manley Hopkins&quot; was his master thesis. He was ordained as a priest in 1942, and obtained a doctorate in English from [[Harvard University]] in 1948.
@@ -1131,9 +855,7 @@ ciao
 [[Category:Loyola University Chicago faculty]]
 [[Category:Harvard University alumni]]
 [[Category:John Carroll University alumni]]
-[[Category:Xavier University alumni]]</text>
-      <sha1>lkiy2qchs23fdkgbuaxpc4d665d3g6w</sha1>
-    </revision>
-  </page>
-
-</mediawiki>
+[[Category:Xavier University alumni]]
+      </text>
+</page>
+</wikimedia>

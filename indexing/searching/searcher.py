@@ -21,6 +21,8 @@ class WikiSearcher:
     group = {'OR' : qparser.OrGroup,
              'AND' : qparser.AndGroup,
             }
+
+    base_url = 'https://en.wikipedia.org/wiki/'
     
     def __init__(self, index, page_ranker):
         """
@@ -49,6 +51,9 @@ class WikiSearcher:
         self.parser = qparser.QueryParser(None, index.schema)
         self.multifield_plugin = qparser.MultifieldPlugin(['text', 'title'])
         self.parser.add_plugin(self.multifield_plugin)
+
+        self.weighting = 'BM25F'
+        self.searcher = WhooshSearcher(reader=self.index.reader(), weighting=WikiSearcher.weighting[self.weighting])
         
     
     def search(self, text, limit=10, exp=True, page_rank=True, text_boost=1.0, title_boost=1.0,
@@ -78,35 +83,40 @@ class WikiSearcher:
         """
         self.multifield_plugin.boosts = {'text': text_boost, 'title': title_boost}
         self.parser.group = WikiSearcher.group.get(group, 'AND')
-        weighting = WikiSearcher.weighting.get(weighting, 'BM25F')
 
         text, list_token_expanded = self.expand(text) if exp else (text, None)
         query = self.parser.parse(text)
         
-        print('\n')
-        print(query)
-        
+        if weighting != self.weighting:
+            print('Imposto il searcher con il weighting : '+weighting+' Può impiegare tempo ...')
+            self.searcher = WhooshSearcher(reader=self.index.reader(), 
+                                           weighting=WikiSearcher.weighting.get(weighting, 'BM25F'))
+            self.weighting = weighting
+            print('Weighting impostato correttamente')
+
+        print('Query : '+str(query))
+
         res = {}
-        with self.index.searcher(weighting=weighting) as searcher:
-            results = searcher.search(query, limit=limit)
+        results = self.searcher.search(query, limit=limit)
 
-            res['time_second'] = results.runtime 
-            res['expanded'] = list_token_expanded if exp else []
-            res['n_res'] = results.estimated_length()
+        res['time_second'] = results.runtime 
+        res['expanded'] = list_token_expanded if exp else []
+        res['n_res'] = results.estimated_length()
 
-            final_score_fn, values_page_rank = self.__combinedScore(page_rank, results)
-            if page_rank:
-                results = sorted(results, key=final_score_fn, reverse=True)   
+        final_score_fn, values_page_rank = self.__combinedScore(page_rank, results)
+        if page_rank:
+            results = sorted(results, key=final_score_fn, reverse=True)   
 
-            res['docs'] = [{'link': 'https://en.wikipedia.org/wiki/'+result['title'].replace(" ", "_"),
-                            'title': result['title'], 
-                            #'text': result['text'],
-                            #'highlight': result.highlights("text", top=2),
-                            'final_score': final_score_fn(result),
-                            'score': result.score,
-                            'page_rank': values_page_rank.get(result['title'], -1)
-                            } for result in results]
+        res['docs'] = [{'link': WikiSearcher.base_url+result['title'].replace(" ", "_"),
+                        'title': result['title'], 
+                        'highlight': result.highlights("text", top=2),
+                        'final_score': final_score_fn(result),
+                        'score': result.score,
+                        'page_rank': values_page_rank.get(result['id_page'], -1)
+                        } for result in results]
+
         return res
+        #return res
 
 
     def __combinedScore(self, page_rank, results):
@@ -121,26 +131,40 @@ class WikiSearcher:
         """
         values_page_rank = {}
         if page_rank:
-            values_page_rank = self.page_ranker.getRank([res['title'] for res in results])
+            values_page_rank = self.page_ranker.getRank([res['id_page'] for res in results], 5)
 
         def final_score_fn(result):
             if page_rank:
-                return result.score * values_page_rank.get(result['title'], 1)
+                return result.score * values_page_rank.get(result['id_page'], 1)
             return result.score
 
         return final_score_fn, values_page_rank
+
+
+    def getFieldInfo(self, field):
+        """
+        Ottengo le informazioni riferite al field.
+        Funzione utile in fase di debug.
         
+        :param field: field di cui voglio le informazioni
+        return dict con le info del field specificato
+        """
+        res = {}
+        #res['lexicon'] = list(self.searcher.lexicon(field))
+        #res['length'] = self.searcher.field_length(field)
+        #res['avg-length'] = self.searcher.avg_field_length(field)
+
+        return {'length': self.searcher.field_length(field)}
+        #return {'length': 10}
+
+
+    def getGeneralInfo(self):
+        """
+        Ottengo le informazioni generali riferite all'indice.
+        Funzione utile in fase di debug.
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        :param self:
+        return dict con le info
+        """
+        #return {'doc_count': 5}
+        return {'doc_count': self.searcher.doc_count()}

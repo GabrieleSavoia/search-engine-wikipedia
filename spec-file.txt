@@ -27,6 +27,7 @@ https://conda.anaconda.org/anaconda/osx-64/qt-5.9.7-h468cd18_1.tar.bz2
 https://repo.anaconda.com/pkgs/main/osx-64/certifi-2020.6.20-py37_0.conda
 https://repo.anaconda.com/pkgs/main/osx-64/chardet-3.0.4-py37_1003.conda
 https://repo.anaconda.com/pkgs/main/noarch/click-7.1.2-py_0.conda
+https://repo.anaconda.com/pkgs/main/osx-64/dicttoxml-1.7.4-py37_1.conda
 https://repo.anaconda.com/pkgs/main/noarch/idna-2.10-py_0.conda
 https://repo.anaconda.com/pkgs/main/noarch/pycparser-2.20-py_2.conda
 https://repo.anaconda.com/pkgs/main/osx-64/pysocks-1.7.1-py37_0.conda

@@ -18,7 +18,7 @@ class Disambiguator():
         DOC: https://www.nltk.org/_modules/nltk/wsd.html
              https://www.linkedin.com/pulse/wordnet-word-sense-disambiguation-wsd-nltk-aswathi-nambiar/
 
-        Esegue la disambiguazione del termine 'index_term'.
+        Esegue la disambiguazione del termine 'index_term' nel contensto definito da 'tokens'.
 
         :param tokens: token della frase
         :param index_term: termine da disambiguare

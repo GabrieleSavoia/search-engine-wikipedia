@@ -9,7 +9,7 @@ import requests
 import os, os.path
 import pickle
 
-def getPrefixSet(dir_storage):
+def getPrefixSet(path_interwiki_links):
     """
     DOCS   https://www.mediawiki.org/wiki/Manual:Interwiki
     
@@ -26,11 +26,8 @@ def getPrefixSet(dir_storage):
     return set di prefissi
     """
 
-    file_name = 'interwiki.prefix'
-    path = dir_storage+file_name
-
-    if os.path.exists(path):
-        with open(path, 'rb') as fp: 
+    if os.path.exists(path_interwiki_links):
+        with open(path_interwiki_links, 'rb') as fp: 
             return set(pickle.load(fp))
     
     url = 'https://www.mediawiki.org/w/api.php'
@@ -48,7 +45,9 @@ def getPrefixSet(dir_storage):
     for i in resp['query']['interwikimap']:
         pref.add(i['prefix'])
 
-    with open(path, 'wb') as fp: 
+    with open(path_interwiki_links, 'wb') as fp: 
         pickle.dump(pref, fp)
     
     return pref
+
+    
