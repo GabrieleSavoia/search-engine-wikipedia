@@ -11,9 +11,13 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QProgressBar
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem, QWidget
 
-from GUI import mainWindow, delegates  # comando :  pyuic5 mainWindow.ui -o mainWindow.py
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
+
+from GUI import mainWindow, delegates          # comando :  pyuic5 mainWindow.ui -o mainWindow.py
+from GUI.evaluationDialog import EvaluationDialog
 
 from indexing import index, evaluation
 from indexing.searching.searcher import WikiSearcher
@@ -21,40 +25,6 @@ from indexing.searching.searcher import WikiSearcher
 import sys  
 import argparse
 import time
-
-
-class CustomDialog(QDialog):
-
-    def __init__(self, wiki_index, settings):
-        super(CustomDialog, self).__init__()
-
-        self.wiki_index = wiki_index
-        self.evaluator = evaluation.Evaluator(self.wiki_index, settings)
-
-        self.textMAP = QLabel('<b>'+'MAP: '+'</b>'+self.evaluator.MAP().__str__())
-
-        self.textNDCG = QLabel('<b>'+'NDCG: '+'</b>')
-        res = ''
-        cont = 0
-        totalValue = 0.0
-        for key, value in sorted(self.evaluator.NDCG().items()):
-            res = res + key.__str__()+' : '+value.__str__()+'\n'
-            totalValue += value
-            cont += 1
-        self.textValNDCG = QLabel(res)
-
-        self.textAverageNDCG = QLabel('<b>'+'Average NDCG: '+'</b>'+(totalValue/cont).__str__())
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.textMAP)
-        layout.addWidget(self.textNDCG)
-        layout.addWidget(self.textValNDCG)
-        layout.addWidget(self.textAverageNDCG)
-        self.setLayout(layout)
-
-        self.setWindowTitle("EVALUATION")
-
-        self.setMinimumSize(250, 610)
 
 
 class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
@@ -87,6 +57,8 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
         
         self.setupQuerySettings() 
 
+        self.w = QWidget()
+
 
     def setupEvent(self):
         self.search_button.clicked.connect(self.startSearchEvent)
@@ -96,8 +68,7 @@ class MainWindow(QtWidgets.QMainWindow, mainWindow.Ui_MainWindow):
 
 
     def computeEvaluation(self):
-        dlg = CustomDialog(self.wiki_index, self.getSettings())
-        dlg.exec_()   
+        dlg = EvaluationDialog(self.w, self.wiki_index, self.getSettings())  
         
         
     def setupQuerySettings(self):

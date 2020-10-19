@@ -52,7 +52,7 @@ class WikiGraph():
         """
         Inizializzazione della classe.
 
-        In 'compact_struct' salvo un dict contente n chiavi (titoli), dove n = numeri nodi del grafo, in 
+        In 'compact_struct' salvo un dict contenente n chiavi (titoli), dove n = numeri nodi del grafo, in 
         cui ciascuna è associata ad una tupla (x, y) con x = id pagina, y = set di link a cui punta (uso un 
         set per togliere duplicati dei link, quindi non è possibile che una pagina punti più volte ad
         un'altra)
@@ -83,7 +83,7 @@ class WikiGraph():
         """
         id_page = int(id_page)
 
-        if self.graph.IsNode(id_page) :
+        if self.graph.IsNode(id_page):
             print('La pagina con id: '+id_page+' e titolo: '+title_page+' è già presente nel grafo.')
             return False
 
@@ -120,7 +120,7 @@ class WikiGraph():
     def end(self):
         """ 
         Questa funzione viene chiamata nel momento in cui ho terminato la creazione del grafo,
-        ovvero quando ho aggiunto tutti le pagine (nodi) ad esso.
+        ovvero quando ho aggiunto tutte le pagine (nodi) ad esso.
 
         Qua eseguo il 'computeEdges()' che mi calcola tutti i possibili edges che 
         compongono il grafo, per poi effettuare il pagerank.

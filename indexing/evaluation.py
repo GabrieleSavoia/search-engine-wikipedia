@@ -34,6 +34,7 @@ class Evaluator:
         """
         self.index = index
         self.settings = settings
+        self.settings['limit'] = 10       # per l'evaluation lo considero sempre a 10
         
         self.queries = set(('DNA', 'Apple', 'Epigenetics', 'Hollywood', 'Maya',
                            'Microsoft', 'Precision', 'Tuscany', '99 balloons',
@@ -78,16 +79,117 @@ class Evaluator:
             docs[query] = [doc['link'] for doc in self.index.query(query, **self.settings)['docs']]
 
         return docs
-    
-    
-    def MAP(self):
+
+
+    def precisonAtLevel(self, recall_level, query):
         """
+
+        """
+        relevant = 0
+
+        if recall_level == 0: recall_level=1
+
+        for count_retrieved, retrieved in enumerate(self.retrieval_set[query], 1):
+            if retrieved in self.google_set[query]:
+                relevant += 1
+
+                if relevant == recall_level:
+                    return relevant/count_retrieved
+        return 0
+
+
+    def averagePrecisionAtRecall(self, round_precision=3):
+        """
+
+        """
+        res = {}
+        tot_queries = len(self.queries)
+
+        for recall_level in range(11):  # 0...10
+            precision = round(sum([self.precisonAtLevel(recall_level, q) for q in self.queries]) / tot_queries,
+                              round_precision)
+            recall = recall_level / 10
+            res[recall] = precision
+
+        return res
+
+    
+    def MAP(self, round_map=3):
+        """
+        - Ogni query ha lo stesso peso
+        - Assume che utente sia interessato a ritornare il maggior numero di documenti rilevanti per la query
+        """
+        return round( sum([len(set(self.google_set[query]) & set(self.retrieval_set[query])) / 
+                      len(self.retrieval_set[query]) for query in self.queries if len(self.retrieval_set[query]) != 0]) / len(self.queries), round_map)
+    
+    
+    def Rprecision(self, r=10, round_precision=3):
+        """
+        :param r: 
+        """
+        res = {}
+
+        for query in self.queries:
+            first_r_relevants = len(set(self.google_set[query]) & set(self.retrieval_set[query][:r]))
+            res[query] = round(first_r_relevants/r, round_precision) 
         
-        """
-        return sum([len(set(self.google_set[query]) & set(self.retrieval_set[query])) / 
-                    len(self.retrieval_set[query]) for query in self.queries if len(self.retrieval_set[query]) != 0]) / len(self.queries)
-    
-    
+        return res
+
+
+    def Emeasure(self, query, b):
+
+        ra = len(set(self.google_set[query]) & set(self.retrieval_set[query]))
+
+        try:
+            recall = ra / len(self.google_set[query])
+        except ZeroDivisionError:
+            recall = 0
+
+        try:
+            precision = ra / len(self.retrieval_set[query])
+        except ZeroDivisionError:
+            precision = 0
+
+        try:
+            res = 1-( (1+pow(b, 2)) / ( (pow(b, 2)/recall) + (1/precision) ) )
+        except ZeroDivisionError:
+            res = 0
+
+        return res
+
+
+    def computeEmeasure(self, b, round_emeasure=3):
+
+        return {query: round(self.Emeasure(query, b), round_emeasure) for query in self.queries}
+
+
+    def Fmeasure(self, query):
+
+        ra = len(set(self.google_set[query]) & set(self.retrieval_set[query]))
+
+        try:
+            recall = ra / len(self.google_set[query])
+        except ZeroDivisionError:
+            recall = 0
+
+        try:
+            precision = ra / len(self.retrieval_set[query])
+        except ZeroDivisionError:
+            precision = 0
+
+        try:
+            res = (2*(precision*recall)) / precision+recall
+        except ZeroDivisionError:
+            res = 0
+
+        return res
+
+
+    def computeFmeasure(self, round_fmeasure=3):
+
+        return {query: round(self.Fmeasure(query), round_fmeasure) for query in self.queries}
+
+
     def getRelevanceVector(self, query, gt=False):
         """
         
@@ -124,13 +226,13 @@ class Evaluator:
                                  for i, rel_i in enumerate(rel_vector[1:], 2) if i <= rank])         
             
                 
-    def NDCG(self):
+    def NDCG(self, round_ndcg=3):
         """
         Valore del DCG normalizzato.
         """
     
-        return {query : Evaluator.DCG(self.getRelevanceVector(query)) / 
-                        Evaluator.DCG(self.getRelevanceVector(query, gt=True)) 
+        return {query : round(Evaluator.DCG(self.getRelevanceVector(query)) / 
+                              Evaluator.DCG(self.getRelevanceVector(query, gt=True)), round_ndcg) 
                             for query in self.queries}
  
        

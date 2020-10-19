@@ -156,13 +156,9 @@ queries = set(('DNA', 'apple', 'Epigenetics', 'Hollywood', 'Maya',
                    'Do geese see god', 'Much ado about nothing'))
 queries = set(('computer','mouse'))
 
-for q in queries:
-    tk = nltk.word_tokenize(q) 
-    print('Query: '+q) 
-    for t in tk:
-        synonyms_t = lesk(tk, t)
-        if synonyms_t is not None:
-            print(synonyms_t.lemma_names())
+
+for x in range(1, 11):  # 1...10
+    print(x)
 
 
 

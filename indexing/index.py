@@ -21,7 +21,6 @@ from .searching.searcher import WikiSearcher
 
 from .pageRank.graph import WikiGraph, WikiPageRanker 
 
-# https://github.com/iwasingh/Wikoogle/tree/master/src
 
 class WikiSchema(SchemaClass):
     """
@@ -46,7 +45,7 @@ class WikiIndex:
         """
         Inizializzazione classe.
 
-        :param dict_paths : dictionary con i path che servono all'indice
+        :param dict_paths : paths che servono all'indice
         """
         self.args_paths = args_paths
         
@@ -172,10 +171,9 @@ class WikiIndex:
     def __addWikiPage(self, graph, writer, **data_parsed):
         """
         Questa funzione viene chiamata quando viene letta una pagina valida dal dump xml.
-
-        Per poter 
-
+        Aggiungo la pagina all'indice, e aggiungo pagina al grafo.
         
+        :param self
         :param graph: instanza di grafo per il page rank
         :param writer: writer per poter aggiungere all'index la pagina di wikipedia letta dal dump
         :param data_parsed: dati letti e filtrati che sono stati ritornati dopo la lettura del dump xml
