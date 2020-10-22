@@ -16,6 +16,7 @@ class WikiSearcher:
 
     weighting = {'TF_IDF' : scoring.TF_IDF,
                  'BM25F' : scoring.BM25F,
+                 'FREQUENCY' : scoring.Frequency,
                 }
 
     group = {'OR' : qparser.OrGroup,
@@ -94,7 +95,7 @@ class WikiSearcher:
             self.weighting = weighting
             print('Weighting impostato correttamente')
 
-        print('Query : '+str(query))
+        #print('Query : '+str(query))
 
         res = {}
         results = self.searcher.search(query, limit=limit)
@@ -116,7 +117,6 @@ class WikiSearcher:
                         } for result in results]
 
         return res
-        #return res
 
 
     def __combinedScore(self, page_rank, results):
@@ -135,7 +135,7 @@ class WikiSearcher:
 
         def final_score_fn(result):
             if page_rank:
-                return result.score * values_page_rank.get(result['id_page'], 1)
+                return (result.score + values_page_rank.get(result['id_page'], 1)) / 2 
             return result.score
 
         return final_score_fn, values_page_rank
@@ -149,13 +149,7 @@ class WikiSearcher:
         :param field: field di cui voglio le informazioni
         return dict con le info del field specificato
         """
-        res = {}
-        #res['lexicon'] = list(self.searcher.lexicon(field))
-        #res['length'] = self.searcher.field_length(field)
-        #res['avg-length'] = self.searcher.avg_field_length(field)
-
         return {'length': self.searcher.field_length(field)}
-        #return {'length': 10}
 
 
     def getGeneralInfo(self):
@@ -166,5 +160,4 @@ class WikiSearcher:
         :param self:
         return dict con le info
         """
-        #return {'doc_count': 5}
         return {'doc_count': self.searcher.doc_count()}

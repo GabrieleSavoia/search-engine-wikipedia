@@ -88,24 +88,6 @@ def AdvancedStemmingAnalyzer(stoplist=STOP_WORDS):
     """
     return StemmingAnalyzer(stoplist=stoplist, cachesize=-1) \
             | CharsetFilter(accent_map)
-
-
-def StemmingWithStopwordAnalyzer(stoplist=[',', '.', ':', ';']):
-    """
-    Analizzatore mediante il quale effettuo la tokenizzazione, il lowercase, 
-    l'eliminazione delle stopword ,lo stemming e inoltre se sono presenti lettere
-    con particolari accenti, queste vengono ricondotte ad una 'forma base'.
-    'accent folding'
-    ES: 'cafè' -> 'cafe'
-    
-    :param stoplist: lista di stopword. E' possibile effettuare l'unione con altre di un altra lista
-    :cachesize: numero max di parole 'stemmate' da mantenere in cache. Più questo 
-                numero è alto più è veloce la fase di stemming ma maggiore è anche
-                la memoria occupata 
-                -1 per definire la cache 'unbound' per lo stemming così da velocizzare l'indicizzazione.
-    """
-    return StemmingAnalyzer(stoplist=stoplist, cachesize=-1) \
-            | CharsetFilter(accent_map)
             
         
              

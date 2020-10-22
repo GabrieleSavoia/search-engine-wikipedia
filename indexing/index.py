@@ -16,7 +16,7 @@ import shutil
 
 from .xmlParsing import saxReader
 
-from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer, StemmingWithStopwordAnalyzer
+from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer
 from .searching.searcher import WikiSearcher
 
 from .pageRank.graph import WikiGraph, WikiPageRanker 
