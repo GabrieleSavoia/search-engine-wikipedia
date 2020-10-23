@@ -201,12 +201,13 @@ class CompareResultsDialog(QDialog):
 
         self.setWindowTitle("Query Detail")
 
-        self.query = QLabel('<b>'+'Query: '+'</b>'+str(query))
+        #self.query = QLabel('<b>'+'Query: '+'</b>'+str(query))
+        self.query = QLabel('<html><head/><body><p align=\'center\'>'+'<b>'+'Query: '+'</b>'+str(query)+'</p></body></html>')
         self.results = results
 
         grid = QGridLayout()
-        grid.addWidget(QLabel('<b>'+'R'+'</b>'), 0, 0)
-        grid.addWidget(QLabel('<b>'+'A'+'</b>'), 0, 1)
+        grid.addWidget(QLabel('<b>'+'R-Set:'+'</b>'), 0, 0)
+        grid.addWidget(QLabel('<b>'+'A-Set:'+'</b>'), 0, 1)
 
         max_len = max( len(self.results['r']), len(self.results['a']) )
 
@@ -229,7 +230,10 @@ class CompareResultsDialog(QDialog):
 
         try:
             r_link = self.results['r'][counter]
-            r_title = r_link[len(searcher.WikiSearcher.base_url):]
+            if (r_link in self.results['a']):
+                r_title = '<b>('+str(counter+1)+')</b> &nbsp;'+r_link[len(searcher.WikiSearcher.base_url):]
+            else:
+                r_title = '('+str(counter+1)+') &nbsp; <b></b>'+r_link[len(searcher.WikiSearcher.base_url):]
         except:
             r_link = ''
             r_title = ''
@@ -241,15 +245,13 @@ class CompareResultsDialog(QDialog):
             a_link = ''
             a_title = ''
 
-        r_label = QLabel(str(str(counter+1)+') '+r_title))
+        r_label = QLabel(str(r_title))
         a_label = QLabel(str(a_title))
 
         if (a_link != '') and (a_link in self.results['r']):
-
             index = self.results['r'].index(a_link)
 
-            a_label = QLabel(str(a_title)+' &nbsp; &nbsp; <b>-> '+ str(index+1) + ')</B>')
-
+            a_label.setText(str(a_title)+' &nbsp; &nbsp; <b> ('+ str(index+1) + ')</b>')
             a_label.setStyleSheet("background-color: yellow;")
 
         return r_label, a_label 

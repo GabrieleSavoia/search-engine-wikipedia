@@ -16,7 +16,7 @@ import shutil
 
 from .xmlParsing import saxReader
 
-from .analysis.analyzers import LemmatizingAnalyzer, AdvancedStemmingAnalyzer, NounSelectionAnalyzer
+from .analysis.analyzers import SimpleAnalyzer_, StandardAnalyzer_, StemmingAnalyzer_, AccentStemmingAnalyzer, LemmatizingAnalyzer, 
 from .searching.searcher import WikiSearcher
 
 from .pageRank.graph import WikiGraph, WikiPageRanker 
@@ -35,9 +35,9 @@ class WikiSchema(SchemaClass):
             volte in cui si ripete il token nel documento
     """
     id_page = ID(stored=True, unique=True)
-    text = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)     #phrase=False per ridurre index
-    title = TEXT(analyzer=AdvancedStemmingAnalyzer(), stored=True)
-    
+    text = TEXT(analyzer=StandardAnalyzer_(), stored=True)     #phrase=False per ridurre index
+    title = TEXT(analyzer=StandardAnalyzer_(), stored=True)
+     
 
 class WikiIndex:
     

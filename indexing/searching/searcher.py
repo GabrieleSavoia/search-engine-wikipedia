@@ -12,6 +12,7 @@ from whoosh import scoring, qparser
 
 from .queryExpansion import Expander
 
+
 class WikiSearcher:
 
     weighting = {'TF_IDF' : scoring.TF_IDF,
@@ -135,7 +136,7 @@ class WikiSearcher:
 
         def final_score_fn(result):
             if page_rank:
-                return (result.score + values_page_rank.get(result['id_page'], 1)) / 2 
+                return result.score * values_page_rank.get(result['id_page'], 1)
             return result.score
 
         return final_score_fn, values_page_rank

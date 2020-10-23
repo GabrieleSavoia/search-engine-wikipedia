@@ -8,6 +8,8 @@ Created on Tue Sep 29 09:00:43 2020
 
 import snap
 
+import math
+
 
 def snapSave(to_save, file_name):
     """
@@ -150,6 +152,27 @@ class WikiPageRanker():
         self.table_rank = snap.TIntFltH()
         snapLoad(self.table_rank, args_paths.pagerank)
 
+        self.max_rank = self.getMaxRank()
+
+
+    def getMaxRank(self):
+        """
+        Calcolo del rank massimo del sistema.
+        Questo valore serve per poter effettuare una normalizzazione dei risultati di rank.
+
+        :param self
+        """
+        keys = snap.TIntV()
+        self.table_rank.GetKeyV(keys)
+
+        max_rank = 0.0
+        for key in keys:
+            tmp = self.table_rank[key]
+            if tmp > max_rank:
+                max_rank = tmp  
+
+        return max_rank      
+
 
     @classmethod
     def computePageRank(cls, graph, args_paths):
@@ -173,6 +196,15 @@ class WikiPageRanker():
         snapSave(table_rank, args_paths.pagerank)
 
 
+    def normalizeRank(self, id_page):
+        """
+        Calcolo rank normalizzato.
+
+        :param id_page: su cui calcolare il rank
+        """
+        return math.sqrt(self.table_rank[int(id_page)] / self.max_rank)
+
+
     def getRank(self, filter_ids, round_rank):
         """
         Ritorna un dict che ha come chiavi i titoli che sono stati passati nel filtro 
@@ -184,7 +216,7 @@ class WikiPageRanker():
         :param filter_ids: lista di id da filtare dalla table 
         return: python dict con i rank riferiti solo agli id passati nel filtro
         """ 
-        return {id_page: round(self.table_rank[int(id_page)], round_rank) for id_page in filter_ids}
+        return {id_page: round(self.normalizeRank(id_page), round_rank) for id_page in filter_ids}
 
 
 

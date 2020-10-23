@@ -154,6 +154,8 @@ class Evaluator:
             recall_level = level / levels
             res[recall_level] = avg_precision_at_level
 
+        print('avgAtRecall: ', res)
+
         return res
 
     
@@ -193,11 +195,12 @@ class Evaluator:
 
         for query in self.queries:
             if r > len(self.A_set[query]):
-                return {query: 'error' for query in self.queries}
+                res[query] = 'error'
+            else:
+                relevants_in_r_retrieved = len(set(self.R_set[query]) & set(self.A_set[query][:r]))
+                res[query] = round(relevants_in_r_retrieved/r, round_precision) 
 
-        for query in self.queries:
-            relevants_in_r_retrieved = len(set(self.R_set[query]) & set(self.A_set[query][:r]))
-            res[query] = round(relevants_in_r_retrieved/r, round_precision) 
+        print('R-precision: ', res)
         
         return res
 
@@ -321,10 +324,14 @@ class Evaluator:
         return: valore ndcg
         """
         rank = 10
-    
-        return {query : round(Evaluator.DCG(self.getRelevanceVector(query), rank) / 
+
+        res = {query : round(Evaluator.DCG(self.getRelevanceVector(query), rank) / 
                               Evaluator.DCG(self.getRelevanceVector(query, gt=True), rank), round_ndcg) 
                             for query in self.queries}
+
+        print('ndcg: ', res)
+    
+        return res
 
 
     def results(self, query):
