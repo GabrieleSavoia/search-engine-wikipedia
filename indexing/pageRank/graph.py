@@ -150,28 +150,7 @@ class WikiPageRanker():
         :param args_paths: path dello storage della tabella del page rank.
         """
         self.table_rank = snap.TIntFltH()
-        snapLoad(self.table_rank, args_paths.pagerank)
-
-        self.max_rank = self.getMaxRank()
-
-
-    def getMaxRank(self):
-        """
-        Calcolo del rank massimo del sistema.
-        Questo valore serve per poter effettuare una normalizzazione dei risultati di rank.
-
-        :param self
-        """
-        keys = snap.TIntV()
-        self.table_rank.GetKeyV(keys)
-
-        max_rank = 0.0
-        for key in keys:
-            tmp = self.table_rank[key]
-            if tmp > max_rank:
-                max_rank = tmp  
-
-        return max_rank      
+        snapLoad(self.table_rank, args_paths.pagerank)    
 
 
     @classmethod
@@ -196,27 +175,40 @@ class WikiPageRanker():
         snapSave(table_rank, args_paths.pagerank)
 
 
-    def normalizeRank(self, id_page):
+    def prepareCalculatorRank(self, filter_ids):
         """
-        Calcolo rank normalizzato.
+        Calcolo il max rank tra i documenti passati, per poi ritornare la 
+        funzione che calcola il rank usando il max locale.
 
-        :param id_page: su cui calcolare il rank
+        :param filter_ids: id pagine su cui calcolare il rank
         """
-        return math.sqrt(self.table_rank[int(id_page)] / self.max_rank)
+        max_rel = max([self.table_rank[int(id_page)] for id_page in filter_ids])
+
+        def calculatorRank(id_page):
+            """
+            Calcolo del pagerank.
+
+            :param id_page: pagina su cui calcolare pagerank
+            """
+            normalized = self.table_rank[int(id_page)] / max_rel
+            alpha = 4
+
+            return 1 + pow(normalized, alpha)
+
+        return calculatorRank
 
 
     def getRank(self, filter_ids, round_rank):
         """
         Ritorna un dict che ha come chiavi i titoli che sono stati passati nel filtro 
-        e che sono presenti nell'Hashtable del page rank e come valore il 
-        valore di page rank della pagina corrispondente, diviso per una costante per il motivo
-        spiegato precedentemente.
+        e come valore il valore di page rank della pagina corrispondente.
 
         :param self
         :param filter_ids: lista di id da filtare dalla table 
         return: python dict con i rank riferiti solo agli id passati nel filtro
         """ 
-        return {id_page: round(self.normalizeRank(id_page), round_rank) for id_page in filter_ids}
+        calculatorRank = self.prepareCalculatorRank(filter_ids)
+        return {id_page: round(calculatorRank(id_page), round_rank) for id_page in filter_ids}
 
 
 

@@ -329,7 +329,8 @@ class Evaluator:
                               Evaluator.DCG(self.getRelevanceVector(query, gt=True), rank), round_ndcg) 
                             for query in self.queries}
 
-        print('ndcg: ', res)
+        avg = sum([v for v in res.values()]) / len(res.values())
+        print('AVG NDCG, ',avg)
     
         return res
 
